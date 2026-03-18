@@ -9,6 +9,9 @@ class SelectionGroupController<T> extends ValueNotifier<T?> {
 
   final Map<T, FocusNode> _focusNodes = {};
 
+  /// When true, all items suppress [WidgetState.selected] regardless of selection.
+  bool _groupHasFocus = false;
+
   void _register(T value, FocusNode node) => _focusNodes[value] = node;
   void _unregister(T value) => _focusNodes.remove(value);
 
@@ -17,6 +20,11 @@ class SelectionGroupController<T> extends ValueNotifier<T?> {
 
   void _focusSelected() {
     if (value != null) _focusNodes[value]?.requestFocus();
+  }
+
+  void _setGroupFocused(bool hasFocus) {
+    _groupHasFocus = hasFocus;
+    notifyListeners();
   }
 }
 
@@ -71,7 +79,8 @@ mixin SelectionGroupItemMixin<W extends StatefulWidget, T> on State<W> {
   }
 
   void _handleControllerChange() {
-    statesController.update(WidgetState.selected, _controller?.value == selectionValue);
+    final isSelected = !(_controller?._groupHasFocus ?? false) && _controller?.value == selectionValue;
+    statesController.update(WidgetState.selected, isSelected);
   }
 
   /// Selects this item in the group.
@@ -103,6 +112,7 @@ class SelectionGroup<T> extends StatefulWidget {
     super.key,
     required this.child,
     this.initialValue,
+    this.onFocusChange,
   });
 
   final Widget child;
@@ -110,12 +120,16 @@ class SelectionGroup<T> extends StatefulWidget {
   /// The value of the item that is selected when the group is first built.
   final T? initialValue;
 
+  /// Called when the group gains or loses focus.
+  ///
+  /// When [hasFocus] is true, all items suppress their [WidgetState.selected]
+  /// state. When false, the selected item restores its state.
+  final ValueChanged<bool>? onFocusChange;
+
   /// Returns the [SelectionGroupController] from the closest [SelectionGroup]
   /// ancestor, or null if there is none.
   static SelectionGroupController<T>? of<T>(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<_SelectionGroupScope<T>>()
-        ?.controller;
+    return context.dependOnInheritedWidgetOfExactType<_SelectionGroupScope<T>>()?.controller;
   }
 
   @override
@@ -143,6 +157,8 @@ class _SelectionGroupState<T> extends State<SelectionGroup<T>> {
       skipTraversal: true,
       onFocusChange: (hasFocus) {
         if (hasFocus) _controller._focusSelected();
+        _controller._setGroupFocused(hasFocus);
+        widget.onFocusChange?.call(hasFocus);
       },
       child: _SelectionGroupScope<T>(
         controller: _controller,

@@ -75,6 +75,21 @@ SelectionGroup<NavDestination>(
 )
 ```
 
+### 4. React when the group gains or loses focus
+
+Use `onFocusChange` to react when focus enters or leaves the group — useful for expanding a sidebar, showing labels, or triggering animations:
+```dart
+SelectionGroup<String>(
+  initialValue: 'home',
+  onFocusChange: (hasFocus) {
+    // expand drawer, show labels, etc.
+  },
+  child: Column(...),
+)
+```
+
+> While the group has focus, `WidgetState.selected` is automatically suppressed on all items. It restores when focus leaves the group.
+
 ## How it works
 
 `SelectionGroup` uses an `InheritedWidget` to provide a `SelectionGroupController` to all descendants. When focus enters the group, it calls `requestFocus()` on the `FocusNode` of the currently selected item.
