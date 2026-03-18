@@ -1,3 +1,4 @@
-## 0.0.1
+## 0.0.3
 
-* TODO: Describe initial release.
+- fix: update LICENSE to MIT
+- fix: update tests
