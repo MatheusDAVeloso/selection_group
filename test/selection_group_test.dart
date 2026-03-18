@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 void main() {
   testWidgets('SelectionGroup initialValue sets selected state', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: SelectionGroup<String>(
           initialValue: 'home',
-          child: const SizedBox(),
+          child: SizedBox(),
         ),
       ),
     );
@@ -22,10 +22,10 @@ void main() {
 
   testWidgets('SelectionGroupController.select updates value', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: SelectionGroup<String>(
           initialValue: 'home',
-          child: const SizedBox(),
+          child: SizedBox(),
         ),
       ),
     );
