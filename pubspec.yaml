@@ -1,6 +1,6 @@
 name: selection_group
 description: A Flutter widget that manages selection and focus state across a group of items.
-version: 0.0.4
+version: 0.0.5
 homepage: https://github.com/MatheusDAVeloso/selection_group
 
 environment:
