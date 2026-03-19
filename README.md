@@ -96,6 +96,26 @@ SelectionGroup<String>(
 
 > While the group has focus, `WidgetState.selected` is automatically suppressed on all items. It restores when the group loses focus.
 
+### 5. Control when selection happens
+
+By default, an item is selected as soon as it gains focus — ideal for TV navigation drawers where focus and selection are the same thing.
+
+Set `selectOnFocus: false` when selection should only happen on press — for example, radio buttons:
+```dart
+SelectionGroup(
+  initialValue: 'option1',
+  selectOnFocus: false,
+  child: Column(
+    children: [
+      MyRadioItem(value: 'option1'),
+      MyRadioItem(value: 'option2'),
+    ],
+  ),
+)
+```
+
+> Focus still moves freely between items — only the selection behavior changes.
+
 ## How it works
 
 `SelectionGroup` uses an `InheritedWidget` to provide a `SelectionGroupController` to all descendants. When focus enters the group, it calls `requestFocus()` on the `FocusNode` of the currently selected item.
