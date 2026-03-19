@@ -1,3 +1,9 @@
+## 0.0.5
+
+- feat: `onFocusChange` replaced by `onFocusedItemChanged` — now returns the focused item value or `null` when the group loses focus
+- feat: focused item is automatically marked as selected
+- fix: focus listeners are now properly removed on unregister
+
 ## 0.0.4
 
 - feat: add `onFocusChange` callback to `SelectionGroup`

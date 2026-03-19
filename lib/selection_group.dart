@@ -7,13 +7,41 @@ import 'package:flutter/material.dart';
 class SelectionGroupController<T> extends ValueNotifier<T?> {
   SelectionGroupController({T? initialValue}) : super(initialValue);
 
-  final Map<T, FocusNode> _focusNodes = {};
-
   /// When true, all items suppress [WidgetState.selected] regardless of selection.
   bool _groupHasFocus = false;
 
-  void _register(T value, FocusNode node) => _focusNodes[value] = node;
-  void _unregister(T value) => _focusNodes.remove(value);
+  /// Stores the [FocusNode] for each registered item.
+  final Map<T, FocusNode> _focusNodes = {};
+
+  /// Stores the focus listener for each registered item, used to remove them on [_unregister].
+  final Map<T, VoidCallback> _focusListeners = {};
+  
+  ValueChanged<T?>? _onFocusedItemChanged;
+
+  void _register(T value, FocusNode node) {
+    void listener() {
+      if (node.hasFocus) {
+        select(value);
+        _onFocusedItemChanged?.call(value);
+      }
+    }
+
+    _focusNodes[value] = node;
+    _focusListeners[value] = listener;
+    node.addListener(listener);
+  }
+
+  void _unregister(T value) {
+    final node = _focusNodes[value];
+    final listener = _focusListeners[value];
+
+    if (node != null && listener != null) {
+      node.removeListener(listener);
+    }
+
+    _focusNodes.remove(value);
+    _focusListeners.remove(value);
+  }
 
   /// Selects the item with the given [value].
   void select(T value) => this.value = value;
@@ -24,6 +52,7 @@ class SelectionGroupController<T> extends ValueNotifier<T?> {
 
   void _setGroupFocused(bool hasFocus) {
     _groupHasFocus = hasFocus;
+    if (!hasFocus) _onFocusedItemChanged?.call(null);
     notifyListeners();
   }
 }
@@ -112,7 +141,7 @@ class SelectionGroup<T> extends StatefulWidget {
     super.key,
     required this.child,
     this.initialValue,
-    this.onFocusChange,
+    this.onFocusedItemChanged,
   });
 
   final Widget child;
@@ -120,11 +149,11 @@ class SelectionGroup<T> extends StatefulWidget {
   /// The value of the item that is selected when the group is first built.
   final T? initialValue;
 
-  /// Called when the group gains or loses focus.
+  /// Called when the focused item changes within the group.
   ///
-  /// When [hasFocus] is true, all items suppress their [WidgetState.selected]
-  /// state. When false, the selected item restores its state.
-  final ValueChanged<bool>? onFocusChange;
+  /// Returns the [value] of the item that gained focus, or [null] when
+  /// the group loses focus entirely.
+  final ValueChanged<T?>? onFocusedItemChanged;
 
   /// Returns the [SelectionGroupController] from the closest [SelectionGroup]
   /// ancestor, or null if there is none.
@@ -143,6 +172,13 @@ class _SelectionGroupState<T> extends State<SelectionGroup<T>> {
   void initState() {
     super.initState();
     _controller = SelectionGroupController<T>(initialValue: widget.initialValue);
+    _controller._onFocusedItemChanged = widget.onFocusedItemChanged;
+  }
+
+  @override
+  void didUpdateWidget(SelectionGroup<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _controller._onFocusedItemChanged = widget.onFocusedItemChanged;
   }
 
   @override
@@ -158,7 +194,6 @@ class _SelectionGroupState<T> extends State<SelectionGroup<T>> {
       onFocusChange: (hasFocus) {
         if (hasFocus) _controller._focusSelected();
         _controller._setGroupFocused(hasFocus);
-        widget.onFocusChange?.call(hasFocus);
       },
       child: _SelectionGroupScope<T>(
         controller: _controller,
