@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 class SelectionGroupController<T> extends ValueNotifier<T?> {
   SelectionGroupController({T? initialValue}) : super(initialValue);
 
+  bool _selectOnFocus = true;
+
   /// When true, all items suppress [WidgetState.selected] regardless of selection.
   bool _groupHasFocus = false;
 
@@ -15,13 +17,13 @@ class SelectionGroupController<T> extends ValueNotifier<T?> {
 
   /// Stores the focus listener for each registered item, used to remove them on [_unregister].
   final Map<T, VoidCallback> _focusListeners = {};
-  
+
   ValueChanged<T?>? _onFocusedItemChanged;
 
   void _register(T value, FocusNode node) {
     void listener() {
       if (node.hasFocus) {
-        select(value);
+        if (_selectOnFocus) select(value);
         _onFocusedItemChanged?.call(value);
       }
     }
@@ -142,6 +144,7 @@ class SelectionGroup<T> extends StatefulWidget {
     required this.child,
     this.initialValue,
     this.onFocusedItemChanged,
+    this.selectOnFocus = true,
   });
 
   final Widget child;
@@ -154,6 +157,12 @@ class SelectionGroup<T> extends StatefulWidget {
   /// Returns the [value] of the item that gained focus, or [null] when
   /// the group loses focus entirely.
   final ValueChanged<T?>? onFocusedItemChanged;
+
+  /// Whether the item should be selected when it gains focus.
+  ///
+  /// Defaults to true. Set to false when selection should only happen
+  /// on press — for example, radio buttons on TV.
+  final bool selectOnFocus;
 
   /// Returns the [SelectionGroupController] from the closest [SelectionGroup]
   /// ancestor, or null if there is none.
@@ -173,12 +182,14 @@ class _SelectionGroupState<T> extends State<SelectionGroup<T>> {
     super.initState();
     _controller = SelectionGroupController<T>(initialValue: widget.initialValue);
     _controller._onFocusedItemChanged = widget.onFocusedItemChanged;
+    _controller._selectOnFocus = widget.selectOnFocus;
   }
 
   @override
   void didUpdateWidget(SelectionGroup<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     _controller._onFocusedItemChanged = widget.onFocusedItemChanged;
+    _controller._selectOnFocus = widget.selectOnFocus;
   }
 
   @override

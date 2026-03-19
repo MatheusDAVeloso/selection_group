@@ -1,3 +1,7 @@
+## 0.0.6
+
+- feat: add `selectOnFocus` flag — set to false to select only on press (e.g. radio buttons on TV)
+
 ## 0.0.5
 
 - feat: `onFocusChange` replaced by `onFocusedItemChanged` — now returns the focused item value or `null` when the group loses focus
