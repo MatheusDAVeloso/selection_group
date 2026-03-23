@@ -24,7 +24,25 @@ SelectionGroup<String>(
 )
 ```
 
-### 2. Add `SelectionGroupItemMixin` to your item's State
+### 2. Use the ready-to-use `SelectionGroupItem`
+The simplest way to create items. It handles focus, press, and visual states for you:
+```dart
+SelectionGroupItem<String>(
+  value: 'home',
+  builder: (context, states) {
+    final isSelected = states.contains(WidgetState.selected);
+    final isFocused = states.contains(WidgetState.focused);
+
+    return Container(
+      color: isSelected ? Colors.blue : Colors.transparent,
+      child: Text('Home', style: TextStyle(fontWeight: isFocused ? FontWeight.bold : FontWeight.normal)),
+    );
+  },
+)
+```
+
+### 3. Or use `SelectionGroupItemMixin` for full control
+Add the mixin to your item's State. If `selectionValue` is null, the item works as a standard interactive widget but won't be part of the group's selection logic.
 ```dart
 class MyNavItem extends StatefulWidget {
   const MyNavItem({super.key, required this.value, required this.label});
@@ -40,8 +58,9 @@ class _MyNavItemState extends State<MyNavItem>
     with SelectionGroupItemMixin<MyNavItem, String> {
 
   // Identifies this item within the group
+  // Optional: return null to disable group selection for this specific instance
   @override
-  String get selectionValue => widget.value;
+  String? get selectionValue => widget.value;
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +79,7 @@ The mixin provides:
 - `statesController` — already includes `WidgetState.selected` when this item is selected
 - `select()` — call this on press to mark this item as selected in the group
 
-### 3. Works with any type, not just String
+### 4. Works with any type, not just String
 ```dart
 enum NavDestination { home, search, profile }
 
@@ -75,7 +94,7 @@ SelectionGroup<NavDestination>(
 )
 ```
 
-### 4. React when focus changes
+### 5. React when focus changes
 
 Use `onFocusedItemChanged` to react when the focused item changes — useful for switching pages, expanding a sidebar, or triggering animations.
 
@@ -96,7 +115,7 @@ SelectionGroup<String>(
 
 > While the group has focus, `WidgetState.selected` is automatically suppressed on all items. It restores when the group loses focus.
 
-### 5. Control when selection happens
+### 6. Control when selection happens
 
 By default, an item is selected as soon as it gains focus — ideal for TV navigation drawers where focus and selection are the same thing.
 
@@ -118,6 +137,7 @@ SelectionGroup(
 
 ## How it works
 
-`SelectionGroup` uses an `InheritedWidget` to provide a `SelectionGroupController` to all descendants. When focus enters the group, it calls `requestFocus()` on the `FocusNode` of the currently selected item.
+The package is divided into **Core** (Controller and Mixin) and **Ready-to-use** components. 
+`SelectionGroup` uses an `InheritedWidget` to provide a `SelectionGroupController` to descendants. When focus enters the group, it calls `requestFocus()` on the `FocusNode` of the currently selected item.
 
-Each item registers its `FocusNode` with the controller via `SelectionGroupItemMixin`, which handles registration, cleanup, and `WidgetState.selected` updates automatically.
+Each item registers its `FocusNode` with the controller via `SelectionGroupItemMixin`, which handles registration, cleanup, and `WidgetState.selected` updates automatically. If an item's `selectionValue` is provided, the controller manages its selection state; otherwise, it behaves as a normal focusable widget with states.

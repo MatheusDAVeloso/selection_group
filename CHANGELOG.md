@@ -1,3 +1,10 @@
+## 0.0.7
+- feat: add `SelectionGroupItem` — a ready-to-use widget that integrates with SelectionGroup and handles visual states automatically.
+
+- feat: `SelectionGroupItemMixin.selectionValue` is now nullable, allowing `SelectionGroupItem` to be used outside of a group while maintaining focus and states.
+
+- refactor: modularized project structure with a navigation summary using part and part of for better maintainability.
+
 ## 0.0.6
 
 - feat: add `selectOnFocus` flag — set to false to select only on press (e.g. radio buttons on TV)
