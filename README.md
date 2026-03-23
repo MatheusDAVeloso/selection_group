@@ -41,6 +41,8 @@ SelectionGroupItem<String>(
 )
 ```
 
+> Note: If value is null or there is no SelectionGroup ancestor, the item still handles focus and WidgetState normally — it just never receives WidgetState.selected. Under the hood, it uses a FilledButton with a neutral style. This means it inherits all of Flutter's native focus engine, automatically configuring itself for TV (D-pad), Android/iOS (Touch), Desktop (Mouse/Keyboard), and Emulators without any extra setup.
+
 ### 3. Or use `SelectionGroupItemMixin` for full control
 Add the mixin to your item's State. If `selectionValue` is null, the item works as a standard interactive widget but won't be part of the group's selection logic.
 ```dart
