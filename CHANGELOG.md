@@ -1,3 +1,8 @@
+## 0.0.10
+- feat: add `enabled` parameter to `SelectionGroupItem` — when false, disables the button and applies `WidgetState.disabled` automatically, allowing `disabled` and `selected` to coexist independently.
+- docs: rewrite `maintainSelectionOnFocus` section to better explain visual behavior on TV/Desktop.
+- docs: added a note about explicit typing (e.g., `SelectionGroup<String>`) to ensure correct value comparison and state updates.
+
 ## 0.0.9
 - docs: add missing CHANGELOG entry for 0.0.8
 

@@ -51,6 +51,7 @@ class SelectionGroupItem<T> extends StatefulWidget {
     required this.value,
     required this.builder,
     this.onPressed,
+    this.enabled = true,
     this.autofocus = false,
     this.style,
   });
@@ -71,6 +72,9 @@ class SelectionGroupItem<T> extends StatefulWidget {
   /// When null, the item is still interactive — it just does not trigger any
   /// external callback on press.
   final VoidCallback? onPressed;
+
+  /// Whether this item is interactive. When false, the button is disabled and WidgetState.disabled is applied automatically.
+  final bool enabled;
 
   /// Whether this item should request focus when the widget tree is first built.
   final bool autofocus;
@@ -98,10 +102,12 @@ class _SelectionGroupItemState<T> extends State<SelectionGroupItem<T>>
     return FilledButton(
       autofocus: widget.autofocus,
       focusNode: focusNode,
-      onPressed: () {
-        select();
-        widget.onPressed?.call();
-      },
+      onPressed: !widget.enabled
+          ? null
+          : () {
+              select();
+              widget.onPressed?.call();
+            },
       statesController: statesController,
       style: const ButtonStyle(
         overlayColor: WidgetStatePropertyAll(Colors.transparent),

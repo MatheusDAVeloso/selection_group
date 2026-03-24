@@ -26,14 +26,19 @@ You can use `SelectionGroupItem` for most cases. Drop down to `SelectionGroupIte
 ## Usage
 
 ### 1. Wrap your items with `SelectionGroup`
+
+> **Pro Tip:** Always specify the type (e.g., `<String>` or `<MyEnum>`). 
+> If you omit the type, the group may fail to match the values correctly, 
+> and `WidgetState.selected` won't be triggered.
+
 ```dart
-SelectionGroup<String>(
+SelectionGroup<String>( // Specify the type here
   initialValue: 'home',
   child: Column(
     children: [
-      MyNavItem(value: 'home', label: 'Home'),
-      MyNavItem(value: 'search', label: 'Search'),
-      MyNavItem(value: 'profile', label: 'Profile'),
+      MyNavItem(value: 'home', label: 'Home'), // Value must match the group type
+      MyNavItem(value: 'search', label: 'Search'), // Value must match the group type
+      MyNavItem(value: 'profile', label: 'Profile'), // Value must match the group type
     ],
   ),
 )
@@ -149,12 +154,12 @@ SelectionGroup(
 
 ### 7. Show selected and focused states simultaneously
 
-By default, `WidgetState.selected` is suppressed while the group has focus so the two states don't overlap visually. Set `maintainSelectionOnFocus: true` when you want both states visible at the same time — for example, a list where the selected row should stay highlighted while you navigate:
+By default, `WidgetState.selected` is suppressed while any item in the group has focus. This prevents visual "noise" on TVs where the focused item is usually the one intended to be selected.
 
 ```dart
 SelectionGroup<String>(
   initialValue: 'item1',
-  maintainSelectionOnFocus: true,
+  maintainSelectionOnFocus: true, // Both states can be active at once
   child: Column(
     children: [
       MyListItem(value: 'item1'),
@@ -164,7 +169,11 @@ SelectionGroup<String>(
 )
 ```
 
-> With this enabled, items show their states independently — the selected item stays highlighted even while focus moves to another one. Without it (the default), selection highlight is hidden while the group has focus, so only the focused item stands out.
+> **How it works:**
+> 
+> * **Default (`false`):** When the group is focused, only the focused item shows its state. The selected highlight is hidden until focus leaves the group entirely.
+> 
+> * **With `maintainSelectionOnFocus: true`:** The selected item stays visually "checked/active" regardless of where the focus pointer is. This is the ideal behavior when you want the currently selected item to remain highlighted even while the user moves the focus to other items in the group.
 
 ### 8. Focus the initial item automatically
 
