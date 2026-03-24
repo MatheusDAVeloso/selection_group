@@ -1,3 +1,6 @@
+## 0.0.9
+- docs: add missing CHANGELOG entry for 0.0.8
+
 ## 0.0.8
 
 - Add `maintainSelectionOnFocus` — keeps `WidgetState.selected` visible while the group has focus

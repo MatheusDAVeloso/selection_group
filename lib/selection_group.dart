@@ -5,7 +5,7 @@
 /// │  Hold Ctrl + LMB to navigate through components                          │
 /// │                                                                          │
 /// │  Author: MatheusDAVeloso                                                 |
-/// |  Package Version: 0.0.8                                                  │
+/// |  Package Version: 0.0.9                                                  │
 /// │  Repo: https://github.com/MatheusDAVeloso/selection_group                │
 /// └──────────────────────────────────────────────────────────────────────────┘
 library selection_group;
