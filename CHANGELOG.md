@@ -1,3 +1,8 @@
+## 0.0.8
+
+- Add `maintainSelectionOnFocus` — keeps `WidgetState.selected` visible while the group has focus
+- Add `focusInitialItem` — requests focus on the initial item on the first frame
+
 ## 0.0.7
 - feat: add `SelectionGroupItem` — a ready-to-use widget that integrates with SelectionGroup and handles visual states automatically.
 
