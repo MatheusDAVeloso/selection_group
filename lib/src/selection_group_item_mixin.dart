@@ -2,14 +2,17 @@ part of '../selection_group.dart';
 
 /// A mixin for [State] classes whose widget participates in a [SelectionGroup].
 ///
-/// Handles registration, focus, and [WidgetState.selected] automatically.
+/// Handles registration, unregistration, focus, and [WidgetState.selected]
+/// automatically — exposes [focusNode], [statesController], and [select] to
+/// your [State].
 ///
 /// When used inside a [SelectionGroup], the item registers itself and reacts
 /// to selection changes via [WidgetState.selected] on its [statesController].
 ///
 /// When used outside a [SelectionGroup] — or when [selectionValue] is null —
 /// the item still provides [focusNode] and [statesController] for focus and
-/// press states, but [WidgetState.selected] is never set.
+/// press states, but [WidgetState.selected] is never set and [select] is a
+/// no-op.
 ///
 /// {@tool snippet}
 /// ```dart
@@ -27,6 +30,9 @@ mixin SelectionGroupItemMixin<W extends StatefulWidget, T> on State<W> {
   ///
   /// Automatically updated with [WidgetState.selected] when the item's
   /// [selectionValue] matches the [SelectionGroupController]'s current value.
+  ///
+  /// Whether [WidgetState.selected] is suppressed while the group has focus
+  /// is controlled by [SelectionGroup.maintainSelectionOnFocus].
   late final WidgetStatesController statesController;
 
   SelectionGroupController<T>? _controller;
@@ -68,8 +74,10 @@ mixin SelectionGroupItemMixin<W extends StatefulWidget, T> on State<W> {
   }
 
   void _handleControllerChange() {
-    final isSelected =
-        selectionValue != null && !(_controller?._groupHasFocus ?? false) && _controller?.value == selectionValue;
+    final suppressOnFocus = !(_controller?._maintainSelectionOnFocus ?? false);
+    final isSelected = selectionValue != null &&
+        !(suppressOnFocus && (_controller?._groupHasFocus ?? false)) &&
+        _controller?.value == selectionValue;
     statesController.update(WidgetState.selected, isSelected);
   }
 

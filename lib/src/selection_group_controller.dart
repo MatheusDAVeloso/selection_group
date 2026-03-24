@@ -1,6 +1,5 @@
 part of '../selection_group.dart';
 
-
 /// A controller that manages the selected value within a [SelectionGroup].
 ///
 /// Similar to [TabController], this is created automatically by [SelectionGroup]
@@ -9,8 +8,9 @@ class SelectionGroupController<T> extends ValueNotifier<T?> {
   SelectionGroupController({T? initialValue}) : super(initialValue);
 
   bool _selectOnFocus = true;
+  bool _maintainSelectionOnFocus = false;
 
-  /// When true, all items suppress [WidgetState.selected] regardless of selection.
+  /// When true, all items suppress [WidgetState.selected] while the group has focus.
   bool _groupHasFocus = false;
 
   /// Stores the [FocusNode] for each registered item.

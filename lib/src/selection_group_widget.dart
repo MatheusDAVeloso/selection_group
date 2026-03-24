@@ -13,8 +13,8 @@ part of '../selection_group.dart';
 ///   initialValue: 'home',
 ///   child: Column(
 ///     children: [
-///       MyItem(value: 'home'),
-///       MyItem(value: 'search'),
+///       MyNavItem(value: 'home'),
+///       MyNavItem(value: 'search'),
 ///     ],
 ///   ),
 /// )
@@ -27,6 +27,8 @@ class SelectionGroup<T> extends StatefulWidget {
     this.initialValue,
     this.onFocusedItemChanged,
     this.selectOnFocus = true,
+    this.maintainSelectionOnFocus = false,
+    this.focusInitialItem = false,
   });
 
   final Widget child;
@@ -45,6 +47,25 @@ class SelectionGroup<T> extends StatefulWidget {
   /// Defaults to true. Set to false when selection should only happen
   /// on press — for example, radio buttons on TV.
   final bool selectOnFocus;
+
+  /// Whether [WidgetState.selected] remains visible on items while the group has focus.
+  ///
+  /// By default, [WidgetState.selected] is suppressed while the group has focus,
+  /// so focused and selected states don't overlap visually. Set to true when
+  /// you want items to show both states simultaneously — for example, in a list
+  /// where the selected item should remain highlighted even while navigating.
+  ///
+  /// Defaults to false.
+  final bool maintainSelectionOnFocus;
+
+  /// Whether the initial item should receive focus when the group is first built.
+  ///
+  /// When true, [initialValue]'s [FocusNode] will request focus on the first frame.
+  /// Useful when a screen opens and focus should land directly on the selected item
+  /// without requiring any user interaction.
+  ///
+  /// Defaults to false.
+  final bool focusInitialItem;
 
   /// Returns the [SelectionGroupController] from the closest [SelectionGroup]
   /// ancestor, or null if there is none.
@@ -65,6 +86,13 @@ class _SelectionGroupState<T> extends State<SelectionGroup<T>> {
     _controller = SelectionGroupController<T>(initialValue: widget.initialValue);
     _controller._onFocusedItemChanged = widget.onFocusedItemChanged;
     _controller._selectOnFocus = widget.selectOnFocus;
+    _controller._maintainSelectionOnFocus = widget.maintainSelectionOnFocus;
+
+    if (widget.focusInitialItem) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _controller._focusSelected();
+      });
+    }
   }
 
   @override
@@ -72,6 +100,7 @@ class _SelectionGroupState<T> extends State<SelectionGroup<T>> {
     super.didUpdateWidget(oldWidget);
     _controller._onFocusedItemChanged = widget.onFocusedItemChanged;
     _controller._selectOnFocus = widget.selectOnFocus;
+    _controller._maintainSelectionOnFocus = widget.maintainSelectionOnFocus;
   }
 
   @override
