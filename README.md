@@ -164,7 +164,7 @@ SelectionGroup<String>(
 )
 ```
 
-> With this enabled, items can show `WidgetState.selected` and `WidgetState.focused` at the same time. Without it (the default), `WidgetState.selected` is only visible when the group has no focus.
+> With this enabled, items show their states independently — the selected item stays highlighted even while focus moves to another one. Without it (the default), selection highlight is hidden while the group has focus, so only the focused item stands out.
 
 ### 8. Focus the initial item automatically
 
