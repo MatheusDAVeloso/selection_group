@@ -1,3 +1,13 @@
+## 0.1.0
+
+The core has proven to be generic and extensible enough to grow. This release begins the widget layer — and marks the start of real-world stress testing in production.
+
+The ideas behind this package are being proposed to Flutter itself in issue [#183904](https://github.com/flutter/flutter/issues/183904), tagged by the Flutter team as `c: new feature`, `c: proposal`, `f: focus`, `framework`, and `team-framework`.
+
+0.1.x will focus on built-in widgets, potential new constructors (multi-selection), and hardening the core against real production usage.
+
+- feat: add `SelectionGroupRadio` — a ready-to-use, fully themeable radio button built on top of `SelectionGroupItem`. All colors (`overlayColor`, `borderColor`, `dotColor`) are driven by `WidgetStateProperty`, defaulting to transparent so the component is ready to be styled from outside.
+
 ## 0.0.10
 - feat: add `enabled` parameter to `SelectionGroupItem` — when false, disables the button and applies `WidgetState.disabled` automatically, allowing `disabled` and `selected` to coexist independently.
 - docs: rewrite `maintainSelectionOnFocus` section to better explain visual behavior on TV/Desktop.

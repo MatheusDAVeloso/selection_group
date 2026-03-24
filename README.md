@@ -18,6 +18,7 @@ The package is designed as composable pieces — use as much or as little as you
 | `SelectionGroupController` | Tracks the selected value and registered focus nodes |
 | `SelectionGroupItemMixin` | Handles registration, unregistration, focus, and `WidgetState.selected` automatically — exposes `focusNode`, `statesController`, and `select()` to your `State` |
 | `SelectionGroupItem` | Ready-to-use item: wraps `FilledButton` + `ValueListenableBuilder` so you only write the visual |
+| `SelectionGroupRadio` | Ready-to-use radio button — fully themeable via `WidgetStateProperty` colors, built on top of `SelectionGroupItem` |
 
 You can use `SelectionGroupItem` for most cases. Drop down to `SelectionGroupItemMixin` when you need full control over the widget structure.
 
@@ -193,6 +194,38 @@ SelectionGroup<String>(
 ```
 
 > This is a one-time request on mount. After that, focus follows the normal traversal rules.
+
+### Using `SelectionGroupRadio`
+
+A ready-to-use radio button. All colors default to transparent — pass `WidgetStateProperty` to style each state:
+```dart
+SelectionGroup<String>(
+  initialValue: 'a',
+  selectOnFocus: false,
+  child: Row(
+    children: [
+      SelectionGroupRadio<String>(
+        value: 'a',
+        overlayColor: WidgetStateProperty.resolveWith((states) {
+          return states.contains(WidgetState.focused)
+              ? Colors.blue.withValues(alpha: 0.12)
+              : Colors.transparent;
+        }),
+        borderColor: WidgetStateProperty.resolveWith((states) {
+          return states.contains(WidgetState.selected)
+              ? Colors.blue
+              : Colors.grey;
+        }),
+        dotColor: WidgetStateProperty.resolveWith((states) {
+          return states.contains(WidgetState.selected)
+              ? Colors.blue
+              : Colors.transparent;
+        }),
+      ),
+    ],
+  ),
+)
+```
 
 ## How it works
 

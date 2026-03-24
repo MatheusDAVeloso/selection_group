@@ -1,7 +1,14 @@
 name: selection_group
-description: A Flutter widget that manages selection and focus state across a group of items.
+description: "The focus-aware, plug-and-play selection engine for Flutter TV, Desktop and Mobile."
 version: 0.0.10
 homepage: https://github.com/MatheusDAVeloso/selection_group
+topics:
+  - focus
+  - selection
+  - tv
+  - navigation
+  - keyboard
+  - remote-control
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
