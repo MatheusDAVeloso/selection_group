@@ -16,9 +16,9 @@ The package is designed as composable pieces — use as much or as little as you
 |---|---|
 | `SelectionGroup` | Provides a `SelectionGroupController` to descendants and manages focus routing |
 | `SelectionGroupController` | Tracks the selected value and registered focus nodes |
-| `SelectionGroupItemMixin` | Handles registration, unregistration, focus, and `WidgetState.selected` automatically — exposes `focusNode`, `statesController`, and `select()` to your `State` |
-| `SelectionGroupItem` | Ready-to-use item: wraps `FilledButton` + `ValueListenableBuilder` so you only write the visual |
-| `SelectionGroupRadio` | Ready-to-use radio button — fully themeable via `WidgetStateProperty` colors, built on top of `SelectionGroupItem` |
+| `SelectionGroupItemMixin` | Handles registration, unregistration, focus, and `WidgetState.selected` automatically — exposes `focusNode`, `statesController`, and `select()` to your `State`. Also the right choice when you already have an existing widget and just want to plug in group selection logic without restructuring anything. |
+| `SelectionGroupItem` | Ready-to-use item: wraps `FilledButton` + `ValueListenableBuilder` so you only write the visual. Supports `externalStates` for passive display mode. |
+| `SelectionGroupRadio` | Ready-to-use radio button, fully themeable via `WidgetStateProperty` colors, built on top of `SelectionGroupItem`. Supports `externalStates` for passive display mode. |
 
 You can use `SelectionGroupItem` for most cases. Drop down to `SelectionGroupItemMixin` when you need full control over the widget structure.
 
@@ -28,7 +28,7 @@ You can use `SelectionGroupItem` for most cases. Drop down to `SelectionGroupIte
 
 ### 1. Wrap your items with `SelectionGroup`
 
-> **Pro Tip:** Always specify the type (e.g., `<String>` or `<MyEnum>`). 
+> **CRITICAL:** Always specify the type (e.g., `<String>` or `<MyEnum>`). 
 > If you omit the type, the group may fail to match the values correctly, 
 > and `WidgetState.selected` won't be triggered.
 
@@ -72,6 +72,10 @@ SelectionGroupItem<String>(
 
 ### 3. Or use `SelectionGroupItemMixin` for full control
 
+> **CRITICAL:** You must specify the type in the mixin signature (e.g., `<MyWidget, String>`). 
+> If you omit the type, the mixin defaults to dynamic and will fail, 
+> to find the `SelectionGroup<String>` ancestor.
+
 Add the mixin to your `State` when you need complete control over the widget structure:
 ```dart
 class _MyNavItemState extends State<MyNavItem>
@@ -96,6 +100,8 @@ The mixin provides:
 - `focusNode` — pass to your button so the group can control focus
 - `statesController` — automatically updated with `WidgetState.selected` when this item is selected
 - `select()` — marks this item as selected in the group on press
+
+`SelectionGroupItemMixin` is also the right choice when you already have an existing widget and just want to plug in group selection logic — without restructuring or wrapping anything. Just add the mixin to your existing `State`, implement `selectionValue`, and the registration, focus, and `WidgetState.selected` wiring happens automatically.
 
 ### 4. Works with any type, not just String
 ```dart
@@ -227,8 +233,59 @@ SelectionGroup<String>(
 )
 ```
 
+### Advanced patterns
+
+**Independent groups side by side** — each `SelectionGroup` manages its own selection independently, even with the same values, even one inside the other:
+```dart
+Row(
+  children: [
+    SelectionGroup<String>(
+      initialValue: '1',
+      child: SelectionGroupRadio(value: '1', enabled: false), // selected but disabled
+    ),
+    SelectionGroup<String>(
+      initialValue: '1',
+      selectOnFocus: false,
+      child: Column(
+        children: [
+          SelectionGroupRadio(value: '1'),
+          SelectionGroupRadio(value: '2'),
+          SelectionGroupRadio(value: '3'),
+        ],
+      ),
+    ),
+  ],
+)
+```
+
+> Groups are scoped by the `InheritedWidget` tree — a `SelectionGroupRadio` (or any item) only registers with the nearest `SelectionGroup` ancestor. Two groups with the same values don't interfere with each other.
+
+**Radio button inside a list item** — pass `externalStates` to make the radio a passive indicator that mirrors the list item's own states, without stealing focus or intercepting input:
+```dart
+SelectionGroupItem<String>(
+  value: 'option1',
+  builder: (context, states) {
+    return Row(
+      children: [
+        Text('Option 1'),
+        SelectionGroupRadio<String>(
+          value: 'option1',
+          externalStates: states, // mirrors the parent — no independent focus or press
+          borderColor: ...,
+          dotColor: ...,
+        ),
+      ],
+    );
+  },
+)
+```
+
+> When `externalStates` is set, the item bypasses its internal `statesController`, `focusNode`, and `FilledButton` entirely — it becomes a pure visual indicator driven by the parent's states.
+
 ## How it works
 
 `SelectionGroup` uses an `InheritedWidget` to provide a `SelectionGroupController` to all descendants. When focus enters the group, the controller calls `requestFocus()` on the `FocusNode` of the currently selected item.
 
 Each item registers its `FocusNode` with the controller via `SelectionGroupItemMixin`, which handles registration, cleanup, and `WidgetState.selected` updates automatically.
+
+`SelectionGroup` also wraps its subtree in a `FocusTraversalGroup` with `WidgetOrderTraversalPolicy`, ensuring focus follows widget tree order internally — so developers don't need to add their own traversal groups or worry about focus leaking outside the group.

@@ -111,15 +111,18 @@ class _SelectionGroupState<T> extends State<SelectionGroup<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return Focus(
-      skipTraversal: true,
-      onFocusChange: (hasFocus) {
-        if (hasFocus) _controller._focusSelected();
-        _controller._setGroupFocused(hasFocus);
-      },
-      child: _SelectionGroupScope<T>(
-        controller: _controller,
-        child: widget.child,
+    return FocusTraversalGroup(
+      policy: WidgetOrderTraversalPolicy(),
+      child: Focus(
+        skipTraversal: true,
+        onFocusChange: (hasFocus) {
+          if (hasFocus) _controller._focusSelected();
+          _controller._setGroupFocused(hasFocus);
+        },
+        child: _SelectionGroupScope<T>(
+          controller: _controller,
+          child: widget.child,
+        ),
       ),
     );
   }

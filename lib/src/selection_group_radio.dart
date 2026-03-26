@@ -41,6 +41,7 @@ class SelectionGroupRadio<T> extends StatelessWidget {
     this.overlayColor,
     this.borderColor,
     this.dotColor,
+    this.externalStates,
   });
 
   /// The value that identifies this radio within its [SelectionGroup].
@@ -67,11 +68,19 @@ class SelectionGroupRadio<T> extends StatelessWidget {
   /// Defaults to transparent when null.
   final WidgetStateProperty<Color?>? dotColor;
 
+  /// When provided, delegates directly to [SelectionGroupItem.externalStates].
+  ///
+  /// The radio enters passive display mode — it becomes non-interactive and
+  /// renders using these states instead of its own. See
+  /// [SelectionGroupItem.externalStates] for full details.
+  final Set<WidgetState>? externalStates;
+
   @override
   Widget build(BuildContext context) {
     return SelectionGroupItem<T>(
       value: value,
       enabled: enabled,
+      externalStates: externalStates,
       builder: (context, states) {
         return AnimatedContainer(
           duration: const Duration(milliseconds: 200),

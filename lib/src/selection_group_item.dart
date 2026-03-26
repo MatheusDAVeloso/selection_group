@@ -54,6 +54,7 @@ class SelectionGroupItem<T> extends StatefulWidget {
     this.enabled = true,
     this.autofocus = false,
     this.style,
+    this.externalStates,
   });
 
   /// The value that identifies this item within its [SelectionGroup].
@@ -88,6 +89,19 @@ class SelectionGroupItem<T> extends StatefulWidget {
   /// Use this parameter to override only what you need.
   final ButtonStyle? style;
 
+  /// When provided, the item enters a passive display mode.
+  ///
+  /// The [builder] is called with this exact [Set<WidgetState>] on every
+  /// rebuild, and the item becomes completely non-interactive — it is wrapped
+  /// in an [IgnorePointer] and bypasses its internal [statesController],
+  /// [focusNode], and [FilledButton] entirely.
+  ///
+  /// Use this when the item should mirror the state of a parent widget (e.g.
+  /// a radio button inside a list item that already owns focus and selection).
+  ///
+  /// When null, the item behaves normally.
+  final Set<WidgetState>? externalStates;
+
   @override
   State<SelectionGroupItem<T>> createState() => _SelectionGroupItemState<T>();
 }
@@ -99,6 +113,12 @@ class _SelectionGroupItemState<T> extends State<SelectionGroupItem<T>>
 
   @override
   Widget build(BuildContext context) {
+    if (widget.externalStates != null) {
+      return IgnorePointer(
+        child: widget.builder(context, widget.externalStates!),
+      );
+    }
+
     return FilledButton(
       autofocus: widget.autofocus,
       focusNode: focusNode,

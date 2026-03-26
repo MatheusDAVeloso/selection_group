@@ -1,3 +1,11 @@
+## 0.1.1
+
+- fix: improved focus behavior in SelectionGroup by wrapping the subtree in a FocusTraversalGroup with WidgetOrderTraversalPolicy. This ensures that internal navigation (like moving between items) follows the widget tree order, preventing the focus from skipping items or accidentally jumping to external headers.
+
+- feat: added `externalStates` to `SelectionGroupItem` and `SelectionGroupRadio`. When provided, the item enters passive display mode — non-interactive, bypasses internal `statesController`, `focusNode`, and `FilledButton` entirely, and renders using the given states directly.
+
+- docs: Added a critical warning about SelectionGroupItemMixin typing. Users must specify the type in the mixin signature (e.g., with `SelectionGroupItemMixin<MyWidget, String>`) to avoid dynamic type mismatching with the SelectionGroup ancestor.
+
 ## 0.1.0
 
 The core has proven to be generic and extensible enough to grow. This release begins the widget layer — and marks the start of real-world stress testing in production.
