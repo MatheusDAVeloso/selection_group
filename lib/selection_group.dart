@@ -5,7 +5,7 @@
 /// │  Hold Ctrl + LMB to navigate through components                          │
 /// │                                                                          │
 /// │  Author: MatheusDAVeloso                                                 │
-/// │  Package Version: 0.1.0                                                  │
+/// │  Package Version: 0.1.2                                                  │
 /// │  Repo: https://github.com/MatheusDAVeloso/selection_group                │
 /// ├──────────────────────────────────────────────────────────────────────────┤
 /// │  ERAS                                                                    │

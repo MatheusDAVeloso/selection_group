@@ -1,3 +1,7 @@
+## 0.1.2
+
+- fix: `select()` now also requests focus for the selected item. This ensures that on touch platforms, tapping an item moves focus correctly, matching the behavior already present on TV and desktop via directional navigation.
+
 ## 0.1.1
 
 - fix: improved focus behavior in SelectionGroup by wrapping the subtree in a FocusTraversalGroup with WidgetOrderTraversalPolicy. This ensures that internal navigation (like moving between items) follows the widget tree order, preventing the focus from skipping items or accidentally jumping to external headers.

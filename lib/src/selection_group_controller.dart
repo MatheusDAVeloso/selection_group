@@ -46,8 +46,13 @@ class SelectionGroupController<T> extends ValueNotifier<T?> {
     _focusListeners.remove(value);
   }
 
-  /// Selects the item with the given [value].
-  void select(T value) => this.value = value;
+  /// Selects the item with the given [value] and moves focus to it.
+  ///
+  /// If the item's [FocusNode] is already focused, this is a no-op for focus.
+  void select(T value) {
+    this.value = value;
+    _focusNodes[value]?.requestFocus();
+  }
 
   void _focusSelected() {
     if (value != null) _focusNodes[value]?.requestFocus();
