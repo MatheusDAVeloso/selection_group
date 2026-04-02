@@ -19,6 +19,13 @@
 /// │    Expanding the arsenal of ready-to-use widgets.                        │
 /// │    Potential new constructors (multi-selection).                         │
 /// │    Real-world stress testing in production.                              │
+/// |                                                                          |
+/// │  Era Refactor — Breaking Changes                                         │
+/// │    Full architectural refactor. ValueNotifier<T?> → ValueNotifier<Set<T>>│
+/// │    Single selection becomes a constrained case of multi (maxSelection:1).│
+/// │    Controller exposure, onSelectionChanged, and potential rename of      │
+/// │    SelectionGroupController → SelectionGroupEngine.                      │
+/// │    See ROADMAP.md at docs folder for full details.                       │
 /// └──────────────────────────────────────────────────────────────────────────┘
 library selection_group;
 

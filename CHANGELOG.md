@@ -2,6 +2,12 @@
 
 - fix: `select()` now also requests focus for the selected item. This ensures that on touch platforms, tapping an item moves focus correctly, matching the behavior already present on TV and desktop via directional navigation.
 
+- feat: added `moveFocusOnPress` parameter to `SelectionGroup`. When set to a `TraversalDirection`, pressing an item moves focus in that direction instead of keeping it on the selected item. Useful for sidebar/content layouts on TV.
+
+- refactor: extracted `isSelected()` method into `SelectionGroupController`, centralizing the logic that determines whether `WidgetState.selected` should be applied. The mixin no longer accesses `_maintainSelectionOnFocus` or `_groupHasFocus` directly. No breaking changes, just organization. Going forward, `SelectionGroupController` is treated now as the kernel of the package: core selection and focus logic lives there, and other layers (mixin, widgets) delegate to it.
+
+- docs: added `ROADMAP.md` to the repository. It documents current architectural limitations, planned breaking changes for the next major version (multi-selection, controller exposure, type refactor), and the long-term vision for the package. Intended for contributors and to set expectations about the direction of the project.
+
 ## 0.1.1
 
 - fix: improved focus behavior in SelectionGroup by wrapping the subtree in a FocusTraversalGroup with WidgetOrderTraversalPolicy. This ensures that internal navigation (like moving between items) follows the widget tree order, preventing the focus from skipping items or accidentally jumping to external headers.

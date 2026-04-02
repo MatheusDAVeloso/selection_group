@@ -74,10 +74,7 @@ mixin SelectionGroupItemMixin<W extends StatefulWidget, T> on State<W> {
   }
 
   void _handleControllerChange() {
-    final suppressOnFocus = !(_controller?._maintainSelectionOnFocus ?? false);
-    final isSelected = selectionValue != null &&
-        !(suppressOnFocus && (_controller?._groupHasFocus ?? false)) &&
-        _controller?.value == selectionValue;
+    final isSelected = selectionValue != null && (_controller?.isSelected(selectionValue as T) ?? false);
     statesController.update(WidgetState.selected, isSelected);
   }
 
@@ -87,6 +84,6 @@ mixin SelectionGroupItemMixin<W extends StatefulWidget, T> on State<W> {
   void select() {
     if (selectionValue != null) {
       _controller?.select(selectionValue as T);
-    }
+    } 
   }
 }

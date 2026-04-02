@@ -20,6 +20,7 @@ class SelectionGroupController<T> extends ValueNotifier<T?> {
   final Map<T, VoidCallback> _focusListeners = {};
 
   ValueChanged<T?>? _onFocusedItemChanged;
+  TraversalDirection? _moveFocusOnPress;
 
   void _register(T value, FocusNode node) {
     void listener() {
@@ -46,12 +47,37 @@ class SelectionGroupController<T> extends ValueNotifier<T?> {
     _focusListeners.remove(value);
   }
 
-  /// Selects the item with the given [value] and moves focus to it.
+  /// Selects the item with the given [value] and moves focus accordingly.
   ///
-  /// If the item's [FocusNode] is already focused, this is a no-op for focus.
+  /// If [_moveFocusOnPress] is set, moves focus in that direction from the
+  /// selected item's [FocusNode] instead of keeping focus on it. Useful for
+  /// sidebar/content layouts where pressing a nav item should move focus to
+  /// the content area.
+  ///
+  /// If [_moveFocusOnPress] is null, focus moves to the selected item's
+  /// [FocusNode]. If it is already focused, this is a no-op for focus.
   void select(T value) {
     this.value = value;
-    _focusNodes[value]?.requestFocus();
+
+    final node = _focusNodes[value];
+    if (_moveFocusOnPress != null && node != null) {
+      node.focusInDirection(_moveFocusOnPress!);
+    } else {
+      // requestFocus ensures focus follows selection on touch platforms,
+      // where tapping an item does not move focus automatically.
+      node?.requestFocus();
+    }
+  }
+
+  /// Returns whether the item with the given [value] should display
+  /// [WidgetState.selected].
+  ///
+  /// Takes [maintainSelectionOnFocus] into account — when false, selected
+  /// is suppressed while the group has focus so focused and selected states
+  /// don't overlap visually.
+  bool isSelected(T value) {
+    final suppressOnFocus = !_maintainSelectionOnFocus;
+    return !(suppressOnFocus && _groupHasFocus) && this.value == value;
   }
 
   void _focusSelected() {

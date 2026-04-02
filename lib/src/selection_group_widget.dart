@@ -29,6 +29,7 @@ class SelectionGroup<T> extends StatefulWidget {
     this.selectOnFocus = true,
     this.maintainSelectionOnFocus = false,
     this.focusInitialItem = false,
+    this.moveFocusOnPress,
   });
 
   final Widget child;
@@ -67,6 +68,14 @@ class SelectionGroup<T> extends StatefulWidget {
   /// Defaults to false.
   final bool focusInitialItem;
 
+  /// When set, moves focus in the given direction when an item is pressed.
+  ///
+  /// Uses [FocusNode.focusInDirection] internally, so focus lands on the
+  /// nearest focusable widget in that direction relative to the pressed item.
+  /// Useful for sidebar/content layouts where pressing a nav item should
+  /// move focus to the content area.
+  final TraversalDirection? moveFocusOnPress;
+
   /// Returns the [SelectionGroupController] from the closest [SelectionGroup]
   /// ancestor, or null if there is none.
   static SelectionGroupController<T>? of<T>(BuildContext context) {
@@ -87,6 +96,7 @@ class _SelectionGroupState<T> extends State<SelectionGroup<T>> {
     _controller._onFocusedItemChanged = widget.onFocusedItemChanged;
     _controller._selectOnFocus = widget.selectOnFocus;
     _controller._maintainSelectionOnFocus = widget.maintainSelectionOnFocus;
+    _controller._moveFocusOnPress = widget.moveFocusOnPress;
 
     if (widget.focusInitialItem) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -101,6 +111,7 @@ class _SelectionGroupState<T> extends State<SelectionGroup<T>> {
     _controller._onFocusedItemChanged = widget.onFocusedItemChanged;
     _controller._selectOnFocus = widget.selectOnFocus;
     _controller._maintainSelectionOnFocus = widget.maintainSelectionOnFocus;
+    _controller._moveFocusOnPress = widget.moveFocusOnPress;
   }
 
   @override
