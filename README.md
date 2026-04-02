@@ -166,157 +166,180 @@ SelectionGroup<SettingsSection>(
 > focus entirely. On touch platforms, tapping an item calls `select()`, which also moves
 > focus — so `onFocusedItemChanged` fires correctly on mobile too.
 
+### 6. Control when selection happens
 
-  ### 6. Control when selection happens
+By default, an item is selected as soon as it gains focus — ideal for TV navigation drawers where focus and selection are the same thing.
 
-  By default, an item is selected as soon as it gains focus — ideal for TV navigation drawers where focus and selection are the same thing.
-
-  Set `selectOnFocus: false` when selection should only happen on press — for example, radio buttons:
-  ```dart
-  SelectionGroup(
-    initialValue: 'option1',
-    selectOnFocus: false,
-    child: Column(
-      children: [
-        MyRadioItem(value: 'option1'),
-        MyRadioItem(value: 'option2'),
-      ],
-    ),
-  )
-  ```
-
-  > Focus still moves freely between items — only the selection behavior changes.
-
-  ### 7. Show selected and focused states simultaneously
-
-  By default, `WidgetState.selected` is suppressed while any item in the group has focus. This prevents visual "noise" on TVs where the focused item is usually the one intended to be selected.
-
-  ```dart
-  SelectionGroup<String>(
-    initialValue: 'item1',
-    maintainSelectionOnFocus: true, // Both states can be active at once
-    child: Column(
-      children: [
-        MyListItem(value: 'item1'),
-        MyListItem(value: 'item2'),
-      ],
-    ),
-  )
-  ```
-
-  > **How it works:**
-  > 
-  > * **Default (`false`):** When the group is focused, only the focused item shows its state. The selected highlight is hidden until focus leaves the group entirely.
-  > 
-  > * **With `maintainSelectionOnFocus: true`:** The selected item stays visually "checked/active" regardless of where the focus pointer is. This is the ideal behavior when you want the currently selected item to remain highlighted even while the user moves the focus to other items in the group.
-
-  ### 8. Focus the initial item automatically
-
-  Set `focusInitialItem: true` to have the `initialValue` item request focus on the first frame — useful when a screen opens and focus should land directly on the selected item without any user interaction:
-
-  ```dart
-  SelectionGroup<String>(
-    initialValue: 'home',
-    focusInitialItem: true,
-    child: Column(
-      children: [
-        MyNavItem(value: 'home'),
-        MyNavItem(value: 'search'),
-      ],
-    ),
-  )
-  ```
-
-  > This is a one-time request on mount. After that, focus follows the normal traversal rules.
-
-  ### Using `SelectionGroupRadio`
-
-  A ready-to-use radio button. All colors default to transparent — pass `WidgetStateProperty` to style each state:
-  ```dart
-  SelectionGroup<String>(
-    initialValue: 'a',
-    selectOnFocus: false,
-    child: Row(
-      children: [
-        SelectionGroupRadio<String>(
-          value: 'a',
-          overlayColor: WidgetStateProperty.resolveWith((states) {
-            return states.contains(WidgetState.focused)
-                ? Colors.blue.withValues(alpha: 0.12)
-                : Colors.transparent;
-          }),
-          borderColor: WidgetStateProperty.resolveWith((states) {
-            return states.contains(WidgetState.selected)
-                ? Colors.blue
-                : Colors.grey;
-          }),
-          dotColor: WidgetStateProperty.resolveWith((states) {
-            return states.contains(WidgetState.selected)
-                ? Colors.blue
-                : Colors.transparent;
-          }),
-        ),
-      ],
-    ),
-  )
-  ```
-
-  ### Advanced patterns
-
-  **Independent groups side by side** — each `SelectionGroup` manages its own selection independently, even with the same values, even one inside the other:
-  ```dart
-  Row(
+Set `selectOnFocus: false` when selection should only happen on press — for example, radio buttons:
+```dart
+SelectionGroup(
+  initialValue: 'option1',
+  selectOnFocus: false,
+  child: Column(
     children: [
-      SelectionGroup<String>(
-        initialValue: '1',
-        child: SelectionGroupRadio(value: '1', enabled: false), // selected but disabled
-      ),
-      SelectionGroup<String>(
-        initialValue: '1',
-        selectOnFocus: false,
-        child: Column(
-          children: [
-            SelectionGroupRadio(value: '1'),
-            SelectionGroupRadio(value: '2'),
-            SelectionGroupRadio(value: '3'),
-          ],
-        ),
+      MyRadioItem(value: 'option1'),
+      MyRadioItem(value: 'option2'),
+    ],
+  ),
+)
+```
+
+> Focus still moves freely between items — only the selection behavior changes.
+
+### 7. Show selected and focused states simultaneously
+
+By default, `WidgetState.selected` is suppressed while any item in the group has focus. This prevents visual "noise" on TVs where the focused item is usually the one intended to be selected.
+
+```dart
+SelectionGroup<String>(
+  initialValue: 'item1',
+  maintainSelectionOnFocus: true, // Both states can be active at once
+  child: Column(
+    children: [
+      MyListItem(value: 'item1'),
+      MyListItem(value: 'item2'),
+    ],
+  ),
+)
+```
+
+> **How it works:**
+> 
+> * **Default (`false`):** When the group is focused, only the focused item shows its state. The selected highlight is hidden until focus leaves the group entirely.
+> 
+> * **With `maintainSelectionOnFocus: true`:** The selected item stays visually "checked/active" regardless of where the focus pointer is. This is the ideal behavior when you want the currently selected item to remain highlighted even while the user moves the focus to other items in the group.
+
+### 8. Focus the initial item automatically
+
+Set `focusInitialItem: true` to have the `initialValue` item request focus on the first frame — useful when a screen opens and focus should land directly on the selected item without any user interaction:
+
+```dart
+SelectionGroup<String>(
+  initialValue: 'home',
+  focusInitialItem: true,
+  child: Column(
+    children: [
+      MyNavItem(value: 'home'),
+      MyNavItem(value: 'search'),
+    ],
+  ),
+)
+```
+
+> This is a one-time request on mount. After that, focus follows the normal traversal rules.
+
+### 9. Move focus on press
+
+Use `moveFocusOnPress` to move focus in a given direction when an item is pressed — instead of keeping focus on the pressed item. Useful for sidebar/content layouts on TV, where pressing a nav item should hand focus off to the content area on the right.
+
+```dart
+SelectionGroup<SettingsSection>(
+  initialValue: SettingsSection.profile,
+  moveFocusOnPress: TraversalDirection.right,
+  onFocusedItemChanged: (value) {
+    if (value != null) viewModel.onSectionSelected(value);
+  },
+  child: Column(
+    children: [
+      MyNavItem(value: SettingsSection.profile),
+      MyNavItem(value: SettingsSection.network),
+    ],
+  ),
+)
+```
+
+> Uses Flutter's `FocusNode.focusInDirection()` internally — focus lands on the nearest
+> focusable widget in that direction relative to the pressed item. Accepts any
+> `TraversalDirection`: `up`, `down`, `left`, `right`.
+
+### Using `SelectionGroupRadio`
+
+A ready-to-use radio button. All colors default to transparent — pass `WidgetStateProperty` to style each state:
+```dart
+SelectionGroup<String>(
+  initialValue: 'a',
+  selectOnFocus: false,
+  child: Row(
+    children: [
+      SelectionGroupRadio<String>(
+        value: 'a',
+        overlayColor: WidgetStateProperty.resolveWith((states) {
+          return states.contains(WidgetState.focused)
+              ? Colors.blue.withValues(alpha: 0.12)
+              : Colors.transparent;
+        }),
+        borderColor: WidgetStateProperty.resolveWith((states) {
+          return states.contains(WidgetState.selected)
+              ? Colors.blue
+              : Colors.grey;
+        }),
+        dotColor: WidgetStateProperty.resolveWith((states) {
+          return states.contains(WidgetState.selected)
+              ? Colors.blue
+              : Colors.transparent;
+        }),
       ),
     ],
-  )
-  ```
+  ),
+)
+```
 
-  > Groups are scoped by the `InheritedWidget` tree — a `SelectionGroupRadio` (or any item) only registers with the nearest `SelectionGroup` ancestor. Two groups with the same values don't interfere with each other.
+### Advanced patterns
 
-  **Radio button inside a list item** — pass `externalStates` to make the radio a passive indicator that mirrors the list item's own states, without stealing focus or intercepting input:
-  ```dart
-  SelectionGroupItem<String>(
-    value: 'option1',
-    builder: (context, states) {
-      return Row(
+**Independent groups side by side** — each `SelectionGroup` manages its own selection independently, even with the same values, even one inside the other:
+```dart
+Row(
+  children: [
+    SelectionGroup<String>(
+      initialValue: '1',
+      child: SelectionGroupRadio(value: '1', enabled: false), // selected but disabled
+    ),
+    SelectionGroup<String>(
+      initialValue: '1',
+      selectOnFocus: false,
+      child: Column(
         children: [
-          Text('Option 1'),
-          SelectionGroupRadio<String>(
-            value: 'option1',
-            externalStates: states, // mirrors the parent — no independent focus or press
-            borderColor: ...,
-            dotColor: ...,
-          ),
+          SelectionGroupRadio(value: '1'),
+          SelectionGroupRadio(value: '2'),
+          SelectionGroupRadio(value: '3'),
         ],
-      );
-    },
-  )
-  ```
+      ),
+    ),
+  ],
+)
+```
 
-  > When `externalStates` is set, the item bypasses its internal `statesController`, `focusNode`, and `FilledButton` entirely — it becomes a pure visual indicator driven by the parent's states.
+> Groups are scoped by the `InheritedWidget` tree — a `SelectionGroupRadio` (or any item) only registers with the nearest `SelectionGroup` ancestor. Two groups with the same values don't interfere with each other.
 
-  ## How it works
+**Radio button inside a list item** — pass `externalStates` to make the radio a passive indicator that mirrors the list item's own states, without stealing focus or intercepting input:
+```dart
+SelectionGroupItem<String>(
+  value: 'option1',
+  builder: (context, states) {
+    return Row(
+      children: [
+        Text('Option 1'),
+        SelectionGroupRadio<String>(
+          value: 'option1',
+          externalStates: states, // mirrors the parent — no independent focus or press
+          borderColor: ...,
+          dotColor: ...,
+        ),
+      ],
+    );
+  },
+)
+```
 
-  `SelectionGroup` uses an `InheritedWidget` to provide a `SelectionGroupController` to all descendants. When focus enters the group, the controller calls `requestFocus()` on the `FocusNode` of the currently selected item.
+> When `externalStates` is set, the item bypasses its internal `statesController`, `focusNode`, and `FilledButton` entirely — it becomes a pure visual indicator driven by the parent's states.
 
-  Each item registers its `FocusNode` with the controller via `SelectionGroupItemMixin`,
-  which handles registration, cleanup, and `WidgetState.selected` updates automatically.
-  Calling `select()` also requests focus for the selected item, so touch interactions
-  move focus correctly without any extra wiring.
+## How it works
 
-  `SelectionGroup` also wraps its subtree in a `FocusTraversalGroup` with `WidgetOrderTraversalPolicy`, ensuring focus follows widget tree order internally — so developers don't need to add their own traversal groups or worry about focus leaking outside the group.
+`SelectionGroup` uses an `InheritedWidget` to provide a `SelectionGroupController` to all descendants. When focus enters the group, the controller calls `requestFocus()` on the `FocusNode` of the currently selected item.
+
+Each item registers its `FocusNode` with the controller via `SelectionGroupItemMixin`,
+which handles registration, cleanup, and `WidgetState.selected` updates automatically.
+Calling `select()` also requests focus for the selected item, so touch interactions
+move focus correctly without any extra wiring.
+
+`SelectionGroup` also wraps its subtree in a `FocusTraversalGroup` with `WidgetOrderTraversalPolicy`, ensuring focus follows widget tree order internally — so developers don't need to add their own traversal groups or worry about focus leaking outside the group.
