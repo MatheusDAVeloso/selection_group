@@ -33,6 +33,10 @@ part of '../selection_group.dart';
 /// )
 /// ```
 /// {@end-tool}
+@Deprecated(
+  'Use SelectionRadio instead, '
+  'which works with both SelectionGroup.single() and SelectionGroup.multi().',
+)
 class SelectionGroupRadio<T> extends StatelessWidget {
   const SelectionGroupRadio({
     super.key,

@@ -22,6 +22,11 @@ part of '../selection_group.dart';
 /// }
 /// ```
 /// {@end-tool}
+@Deprecated(
+  'Use SelectionMixin instead, '
+  'which depends on SelectionControllerBase and works with '
+  'both SelectionGroup.single() and SelectionGroup.multi().',
+)
 mixin SelectionGroupItemMixin<W extends StatefulWidget, T> on State<W> {
   /// The focus node used by this item's interactive widget.
   late final FocusNode focusNode;
@@ -57,7 +62,7 @@ mixin SelectionGroupItemMixin<W extends StatefulWidget, T> on State<W> {
     _controller?.removeListener(_handleControllerChange);
     if (selectionValue != null) _controller?._unregister(selectionValue as T);
 
-    _controller = SelectionGroup.of<T>(context);
+    _controller = _SelectionGroupLegacy.of<T>(context);
     if (selectionValue != null) _controller?._register(selectionValue as T, focusNode);
     _controller?.addListener(_handleControllerChange);
 

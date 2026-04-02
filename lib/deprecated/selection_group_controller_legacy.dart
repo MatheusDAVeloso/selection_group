@@ -4,6 +4,10 @@ part of '../selection_group.dart';
 ///
 /// Similar to [TabController], this is created automatically by [SelectionGroup]
 /// and can be accessed via [SelectionGroup.of].
+@Deprecated(
+  'Use SelectionGroup.single() or SelectionGroup.multi() instead. '
+  'Controllers are internal in 0.2.0 — see SelectionController for the public interface.',
+)
 class SelectionGroupController<T> extends ValueNotifier<T?> {
   SelectionGroupController({T? initialValue}) : super(initialValue);
 

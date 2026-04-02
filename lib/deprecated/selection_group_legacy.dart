@@ -3,7 +3,7 @@ part of '../selection_group.dart';
 /// A widget that groups selectable items and manages which one is selected.
 ///
 /// Works similarly to [FocusTraversalGroup] — wraps a subtree and provides
-/// a [SelectionGroupController] to descendants via [SelectionGroup.of].
+/// a [SelectionGroupController] to descendants via [_SelectionGroupLegacy.of].
 ///
 /// When focus enters the group, it automatically moves to the selected item.
 ///
@@ -20,8 +20,12 @@ part of '../selection_group.dart';
 /// )
 /// ```
 /// {@end-tool}
-class SelectionGroup<T> extends StatefulWidget {
-  const SelectionGroup({
+@Deprecated(
+  'Use SelectionGroup.single() instead. '
+  'This API is frozen — functional but will not receive new features.',
+)
+class _SelectionGroupLegacy<T> extends SelectionGroup<T> {
+  const _SelectionGroupLegacy({
     super.key,
     required this.child,
     this.initialValue,
@@ -30,7 +34,7 @@ class SelectionGroup<T> extends StatefulWidget {
     this.maintainSelectionOnFocus = false,
     this.focusInitialItem = false,
     this.moveFocusOnPress,
-  });
+  }) : super._();
 
   final Widget child;
 
@@ -76,17 +80,17 @@ class SelectionGroup<T> extends StatefulWidget {
   /// move focus to the content area.
   final TraversalDirection? moveFocusOnPress;
 
-  /// Returns the [SelectionGroupController] from the closest [SelectionGroup]
+  /// Returns the [SelectionGroupController] from the closest [_SelectionGroupLegacy]
   /// ancestor, or null if there is none.
   static SelectionGroupController<T>? of<T>(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_SelectionGroupScope<T>>()?.controller;
   }
 
   @override
-  State<SelectionGroup<T>> createState() => _SelectionGroupState<T>();
+  State<_SelectionGroupLegacy<T>> createState() => _SelectionGroupLegacyState<T>();
 }
 
-class _SelectionGroupState<T> extends State<SelectionGroup<T>> {
+class _SelectionGroupLegacyState<T> extends State<_SelectionGroupLegacy<T>> {
   late final SelectionGroupController<T> _controller;
 
   @override
@@ -106,7 +110,7 @@ class _SelectionGroupState<T> extends State<SelectionGroup<T>> {
   }
 
   @override
-  void didUpdateWidget(SelectionGroup<T> oldWidget) {
+  void didUpdateWidget(_SelectionGroupLegacy<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     _controller._onFocusedItemChanged = widget.onFocusedItemChanged;
     _controller._selectOnFocus = widget.selectOnFocus;
