@@ -9,6 +9,7 @@ class _SelectionGroupMulti<T> extends SelectionGroup<T> {
     this.maxSelection,
     this.maxSelectionBehavior = MaxSelectionBehavior.block,
     this.initialItemToFocus,
+    this.onFocusedItemChanged,
   }) : super._();
 
   final Widget child;
@@ -17,6 +18,7 @@ class _SelectionGroupMulti<T> extends SelectionGroup<T> {
   final int? maxSelection;
   final MaxSelectionBehavior maxSelectionBehavior;
   final T? initialItemToFocus;
+  final ValueChanged<T?>? onFocusedItemChanged;
 
   @override
   State<_SelectionGroupMulti<T>> createState() => _SelectionGroupMultiState<T>();
@@ -32,6 +34,7 @@ class _SelectionGroupMultiState<T> extends State<_SelectionGroupMulti<T>> {
     _controller._onItemToggled = widget.onItemToggled;
     _controller._maxSelection = widget.maxSelection;
     _controller._maxSelectionBehavior = widget.maxSelectionBehavior;
+    _controller._onFocusedItemChanged = widget.onFocusedItemChanged;
 
     if (widget.initialItemToFocus != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -46,6 +49,7 @@ class _SelectionGroupMultiState<T> extends State<_SelectionGroupMulti<T>> {
     _controller._onItemToggled = widget.onItemToggled;
     _controller._maxSelection = widget.maxSelection;
     _controller._maxSelectionBehavior = widget.maxSelectionBehavior;
+    _controller._onFocusedItemChanged = widget.onFocusedItemChanged;
   }
 
   @override

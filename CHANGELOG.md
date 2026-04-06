@@ -1,3 +1,31 @@
+## 0.2.0
+
+- feat: added `SelectionGroup.multi()` — multi-selection support with `maxSelection`, 
+`MaxSelectionBehavior.block/dequeue`, `onItemToggled`, `initialItemToFocus`, 
+and `onFocusedItemChanged`.
+
+- feat: added `SelectionGroup.single()` — same behavior as the original `SelectionGroup`, 
+now as a named constructor. The default constructor is deprecated in favor of this.
+
+- fix: `moveFocusOnPress` no longer triggers on focus events. Previously, navigating 
+with D-pad or keyboard would incorrectly call `focusInDirection`, causing focus to escape 
+the group. Now only triggers on press via `fromPress` parameter internally.
+
+- refactor: introduced `SelectionControllerBase` interface, `SelectionControllerSingle`, 
+and `SelectionControllerMulti`. Controllers are now internal — not part of the public API.
+
+- refactor: introduced `SelectionMixin` and `SelectionItem` as the new widget layer, 
+replacing `SelectionGroupItemMixin` and `SelectionGroupItem`.
+
+- deprecated: `SelectionGroup()` default constructor — use `SelectionGroup.single()`.
+- deprecated: `SelectionGroupController` — controllers are now internal.
+- deprecated: `SelectionGroupItemMixin` — use `SelectionMixin`.
+- deprecated: `SelectionGroupItem` — use `SelectionItem`.
+- deprecated: `SelectionGroupRadio` — use `SelectionRadio`.
+
+- note: `moveFocusOnPress` bug exists in the legacy API and will not be backported. 
+Migrate to `SelectionGroup.single()` to get the fix.
+
 ## 0.1.2
 
 - fix: `select()` now also requests focus for the selected item. This ensures that on touch platforms, tapping an item moves focus correctly, matching the behavior already present on TV and desktop via directional navigation.

@@ -68,8 +68,7 @@ class SelectionItem<T> extends StatefulWidget {
   State<SelectionItem<T>> createState() => _SelectionItemState<T>();
 }
 
-class _SelectionItemState<T> extends State<SelectionItem<T>>
-    with SelectionMixin<SelectionItem<T>, T> {
+class _SelectionItemState<T> extends State<SelectionItem<T>> with SelectionMixin<SelectionItem<T>, T> {
   @override
   T? get selectionValue => widget.value;
 
@@ -87,7 +86,7 @@ class _SelectionItemState<T> extends State<SelectionItem<T>>
       onPressed: !widget.enabled
           ? null
           : () {
-              select();
+              select(fromPress: true);
               widget.onPressed?.call();
             },
       statesController: statesController,

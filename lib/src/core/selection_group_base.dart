@@ -55,6 +55,7 @@ class SelectionGroup<T> extends StatefulWidget {
     int? maxSelection,
     MaxSelectionBehavior maxSelectionBehavior = MaxSelectionBehavior.block,
     T? initialItemToFocus,
+    ValueChanged<T?>? onFocusedItemChanged,
   }) {
     return _SelectionGroupMulti<T>(
       key: key,
@@ -63,6 +64,7 @@ class SelectionGroup<T> extends StatefulWidget {
       maxSelection: maxSelection,
       maxSelectionBehavior: maxSelectionBehavior,
       initialItemToFocus: initialItemToFocus,
+      onFocusedItemChanged: onFocusedItemChanged,
       child: child,
     );
   }

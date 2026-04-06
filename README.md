@@ -1,145 +1,111 @@
 # SelectionGroup
 
-A Flutter package for managing selection and focus state across a group of items — similar to how `TabController` works for tabs, but for any custom selectable widget.
+A Flutter package for managing selection and focus state across a group of items —
+without boilerplate.
 
-When focus enters the group (e.g. via TV remote or keyboard), it automatically moves to the currently selected item.
+Built for TV, desktop, and mobile. Especially useful where D-pad/keyboard navigation
+needs to restore focus to the last selected item when re-entering a group.
 
-## Motivation
+---
 
-Flutter doesn't have a built-in way to group arbitrary selectable widgets and track which one is selected while also managing focus correctly. This is especially noticeable on TV/desktop, where navigating into a sidebar or menu should restore focus to the last selected item.
+## Overview
+
+Flutter has no built-in way to group arbitrary selectable widgets and track which one
+is selected while also managing focus correctly. `SelectionGroup` fills that gap.
+
+It works similarly to `TabController` for tabs — but for any custom widget, any type,
+and any platform.
+
+---
+
+## Quick start
+
+### Single selection
+```dart
+SelectionGroup<String>.single(
+  initialValue: 'home',
+  child: Column(
+    children: [
+      SelectionItem<String>(
+        value: 'home',
+        builder: (context, states) => MyNavItem(
+          label: 'Home',
+          isSelected: states.contains(WidgetState.selected),
+          isFocused: states.contains(WidgetState.focused),
+        ),
+      ),
+      SelectionItem<String>(
+        value: 'search',
+        builder: (context, states) => MyNavItem(
+          label: 'Search',
+          isSelected: states.contains(WidgetState.selected),
+          isFocused: states.contains(WidgetState.focused),
+        ),
+      ),
+    ],
+  ),
+)
+```
+
+### Multi selection
+```dart
+SelectionGroup<String>.multi(
+  initialValues: {'flutter', 'dart'},
+  onItemToggled: (value, isSelected) {
+    print('$value → $isSelected');
+  },
+  child: Wrap(
+    children: [
+      SelectionItem<String>(
+        value: 'flutter',
+        builder: (context, states) => MyChip(
+          label: 'Flutter',
+          selected: states.contains(WidgetState.selected),
+        ),
+      ),
+      SelectionItem<String>(
+        value: 'dart',
+        builder: (context, states) => MyChip(
+          label: 'Dart',
+          selected: states.contains(WidgetState.selected),
+        ),
+      ),
+    ],
+  ),
+)
+```
+
+> **Always specify the type** (e.g. `<String>`, `<MyEnum>`). Without it, the group
+> won't match values correctly and `WidgetState.selected` won't fire.
+
+---
 
 ## Building blocks
 
-The package is designed as composable pieces — use as much or as little as you need:
-
 | Piece | What it does |
 |---|---|
-| `SelectionGroup` | Provides a `SelectionGroupController` to descendants and manages focus routing |
-| `SelectionGroupController` | Tracks the selected value and registered focus nodes |
-| `SelectionGroupItemMixin` | Handles registration, unregistration, focus, and `WidgetState.selected` automatically — exposes `focusNode`, `statesController`, and `select()` to your `State`. Also the right choice when you already have an existing widget and just want to plug in group selection logic without restructuring anything. |
-| `SelectionGroupItem` | Ready-to-use item: wraps `FilledButton` + `ValueListenableBuilder` so you only write the visual. Supports `externalStates` for passive display mode. |
-| `SelectionGroupRadio` | Ready-to-use radio button, fully themeable via `WidgetStateProperty` colors, built on top of `SelectionGroupItem`. Supports `externalStates` for passive display mode. |
+| `SelectionGroup.single()` | Single-selection group. Focus auto-restores to the selected item when re-entering. |
+| `SelectionGroup.multi()` | Multi-selection group with optional max limit and toggle callbacks. |
+| `SelectionItem` | Ready-to-use item. Wraps a `FilledButton` — you only write the visual via `builder`. |
+| `SelectionMixin` | For full widget control. Add to your `State` to get `focusNode`, `statesController`, and `select()`. |
+| `SelectionRadio` | Ready-to-use radio button, fully themeable via `WidgetStateProperty`. |
 
-You can use `SelectionGroupItem` for most cases. Drop down to `SelectionGroupItemMixin` when you need full control over the widget structure.
+---
 
-> **Note:** `select()` and `WidgetState.selected` only make sense inside a `SelectionGroup` — without one, there's no shared selection state to update. Outside a group, `SelectionGroupItem` still gives you focus and other states via Flutter's native focus engine, but `select()` is a no-op and `WidgetState.selected` is never applied.
+## SelectionGroup.single()
 
-## Usage
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `initialValue` | `T?` | `null` | The selected item on first build. |
+| `onFocusedItemChanged` | `ValueChanged<T?>?` | `null` | Called when the focused item changes. `null` when the group loses focus. |
+| `selectOnFocus` | `bool` | `true` | Whether focusing an item also selects it. Set to `false` for radio buttons. |
+| `maintainSelectionOnFocus` | `bool` | `false` | Whether `WidgetState.selected` stays visible while the group has focus. |
+| `focusInitialItem` | `bool` | `false` | Whether the initial item requests focus on the first frame. |
+| `moveFocusOnPress` | `TraversalDirection?` | `null` | Moves focus in this direction when an item is pressed, instead of keeping it there. |
 
-### 1. Wrap your items with `SelectionGroup`
-
-> **CRITICAL:** Always specify the type (e.g., `<String>` or `<MyEnum>`). 
-> If you omit the type, the group may fail to match the values correctly, 
-> and `WidgetState.selected` won't be triggered.
-
+### Switching pages
 ```dart
-SelectionGroup<String>( // Specify the type here
-  initialValue: 'home',
-  child: Column(
-    children: [
-      MyNavItem(value: 'home', label: 'Home'), // Value must match the group type
-      MyNavItem(value: 'search', label: 'Search'), // Value must match the group type
-      MyNavItem(value: 'profile', label: 'Profile'), // Value must match the group type
-    ],
-  ),
-)
-```
-
-### 2. Use ready-to-use `SelectionGroupItem` — the recommended starting point
-
-Handles focus, press, and visual states. You only write the visual:
-```dart
-SelectionGroupItem<String>(
-  value: 'home',
-  builder: (context, states) {
-    final isSelected = states.contains(WidgetState.selected);
-    final isFocused = states.contains(WidgetState.focused);
-
-    return Container(
-      color: isSelected ? Colors.blue : Colors.transparent,
-      child: Text(
-        'Home',
-        style: TextStyle(fontWeight: isFocused ? FontWeight.bold : FontWeight.normal),
-      ),
-    );
-  },
-)
-```
-
-> Under the hood it uses a `FilledButton` with a neutral style, inheriting Flutter's native focus engine — TV (D-pad), touch, mouse, and keyboard work automatically.
-
->`SelectionGroupItem` can also be used outside of a `SelectionGroup` — passing `value: null` opts out of group selection while keeping focus and other button states. Useful when you want the same button boilerplate without the selection logic.
-
-### 3. Or use `SelectionGroupItemMixin` for full control
-
-> **CRITICAL:** You must specify the type in the mixin signature (e.g., `<MyWidget, String>`). 
-> If you omit the type, the mixin defaults to dynamic and will fail, 
-> to find the `SelectionGroup<String>` ancestor.
-
-Add the mixin to your `State` when you need complete control over the widget structure:
-```dart
-class _MyNavItemState extends State<MyNavItem>
-    with SelectionGroupItemMixin<MyNavItem, String> {
-
-  @override
-  String? get selectionValue => widget.value; // return null to opt out of group selection
-
-  @override
-  Widget build(BuildContext context) {
-    return FilledButton(
-      focusNode: focusNode,               // provided by the mixin
-      statesController: statesController, // provided by the mixin — includes WidgetState.selected
-      onPressed: () => select(),          // provided by the mixin — no-op outside a group
-      child: Text(widget.label),
-    );
-  }
-}
-```
-
-The mixin provides:
-- `focusNode` — pass to your button so the group can control focus
-- `statesController` — automatically updated with `WidgetState.selected` when this item is selected
-- `select()` — marks this item as selected in the group on press
-
-`SelectionGroupItemMixin` is also the right choice when you already have an existing widget and just want to plug in group selection logic — without restructuring or wrapping anything. Just add the mixin to your existing `State`, implement `selectionValue`, and the registration, focus, and `WidgetState.selected` wiring happens automatically.
-
-### 4. Works with any type, not just String
-```dart
-enum NavDestination { home, search, profile }
-
-SelectionGroup<NavDestination>(
-  initialValue: NavDestination.home,
-  child: Column(
-    children: [
-      MyNavItem(value: NavDestination.home),
-      MyNavItem(value: NavDestination.search),
-    ],
-  ),
-)
-```
-
-### 5. React when focus changes
-
-Use `onFocusedItemChanged` to react when the focused item changes — useful for switching pages, expanding a sidebar, or triggering animations.
-
-Returns the `value` of the focused item, or `null` when the group loses focus entirely:
-```dart
-SelectionGroup<String>(
-  initialValue: 'home',
-  onFocusedItemChanged: (value) {
-    if (value != null) {
-      // item 'value' gained focus — switch page, expand drawer, etc.
-    } else {
-      // group lost focus — collapse drawer, etc.
-    }
-  },
-  child: Column(...),
-)
-```
-
-**Switching pages with a `PageController`:**
-```dart
-SelectionGroup<int>(
+SelectionGroup<int>.single(
   initialValue: 0,
   onFocusedItemChanged: (value) {
     if (value != null) pageController.jumpToPage(value);
@@ -148,120 +114,160 @@ SelectionGroup<int>(
 )
 ```
 
-**Driving a ViewModel (e.g. a settings sidebar):**
+### Radio button behavior
 ```dart
-SelectionGroup<SettingsSection>(
-  initialValue: SettingsSection.profile,
-  selectOnFocus: false,
-  maintainSelectionOnFocus: true,
-  onFocusedItemChanged: (value) {
-    if (value != null) viewModel.onSectionSelected(value);
-  },
+SelectionGroup<String>.single(
+  initialValue: 'a',
+  selectOnFocus: false, // selection only happens on press
   child: Column(...),
 )
 ```
 
-> By default, `WidgetState.selected` is suppressed on all items while the group has focus,
-> so focused and selected states don't overlap visually. It restores when the group loses
-> focus entirely. On touch platforms, tapping an item calls `select()`, which also moves
-> focus — so `onFocusedItemChanged` fires correctly on mobile too.
-
-### 6. Control when selection happens
-
-By default, an item is selected as soon as it gains focus — ideal for TV navigation drawers where focus and selection are the same thing.
-
-Set `selectOnFocus: false` when selection should only happen on press — for example, radio buttons:
+### Sidebar/content layout on TV
 ```dart
-SelectionGroup(
-  initialValue: 'option1',
-  selectOnFocus: false,
-  child: Column(
-    children: [
-      MyRadioItem(value: 'option1'),
-      MyRadioItem(value: 'option2'),
-    ],
-  ),
+SelectionGroup<Section>.single(
+  initialValue: Section.profile,
+  moveFocusOnPress: TraversalDirection.right, // after press, focus jumps to content
+  child: Column(...),
 )
 ```
 
-> Focus still moves freely between items — only the selection behavior changes.
-
-### 7. Show selected and focused states simultaneously
-
-By default, `WidgetState.selected` is suppressed while any item in the group has focus. This prevents visual "noise" on TVs where the focused item is usually the one intended to be selected.
-
+### Show selected and focused simultaneously
 ```dart
-SelectionGroup<String>(
+SelectionGroup<String>.single(
   initialValue: 'item1',
-  maintainSelectionOnFocus: true, // Both states can be active at once
-  child: Column(
-    children: [
-      MyListItem(value: 'item1'),
-      MyListItem(value: 'item2'),
-    ],
-  ),
+  maintainSelectionOnFocus: true,
+  child: Column(...),
 )
 ```
 
-> **How it works:**
-> 
-> * **Default (`false`):** When the group is focused, only the focused item shows its state. The selected highlight is hidden until focus leaves the group entirely.
-> 
-> * **With `maintainSelectionOnFocus: true`:** The selected item stays visually "checked/active" regardless of where the focus pointer is. This is the ideal behavior when you want the currently selected item to remain highlighted even while the user moves the focus to other items in the group.
+> By default, `WidgetState.selected` is suppressed while the group has focus so
+> focused and selected states don't overlap visually. Set `maintainSelectionOnFocus: true`
+> when you want both active at once — for example, a list where the selected item should
+> stay highlighted while the user navigates.
 
-### 8. Focus the initial item automatically
+---
 
-Set `focusInitialItem: true` to have the `initialValue` item request focus on the first frame — useful when a screen opens and focus should land directly on the selected item without any user interaction:
+## SelectionGroup.multi()
 
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `initialValues` | `Set<T>?` | `null` | The selected items on first build. |
+| `onItemToggled` | `void Function(T, bool)?` | `null` | Called when an item is toggled. Second argument is the new selected state. |
+| `onFocusedItemChanged` | `ValueChanged<T?>?` | `null` | Called when the focused item changes. `null` when the group loses focus. |
+| `maxSelection` | `int?` | `null` | Maximum number of simultaneously selected items. |
+| `maxSelectionBehavior` | `MaxSelectionBehavior` | `.block` | What happens when `maxSelection` is reached. |
+| `initialItemToFocus` | `T?` | `null` | The item that receives focus on the first frame. |
+
+### MaxSelectionBehavior
+
+| Value | Behavior |
+|---|---|
+| `block` | Prevents selecting more items once the limit is reached. |
+| `dequeue` | Removes the oldest selected item to make room for the new one. |
 ```dart
-SelectionGroup<String>(
-  initialValue: 'home',
-  focusInitialItem: true,
-  child: Column(
-    children: [
-      MyNavItem(value: 'home'),
-      MyNavItem(value: 'search'),
-    ],
-  ),
+SelectionGroup<String>.multi(
+  maxSelection: 3,
+  maxSelectionBehavior: MaxSelectionBehavior.dequeue,
+  child: Column(...),
 )
 ```
 
-> This is a one-time request on mount. After that, focus follows the normal traversal rules.
+---
 
-### 9. Move focus on press
+## SelectionItem
 
-Use `moveFocusOnPress` to move focus in a given direction when an item is pressed — instead of keeping focus on the pressed item. Useful for sidebar/content layouts on TV, where pressing a nav item should hand focus off to the content area on the right.
-
+The recommended starting point. Handles focus, press, and `WidgetState` automatically —
+you only write the visual:
 ```dart
-SelectionGroup<SettingsSection>(
-  initialValue: SettingsSection.profile,
-  moveFocusOnPress: TraversalDirection.right,
-  onFocusedItemChanged: (value) {
-    if (value != null) viewModel.onSectionSelected(value);
+SelectionItem<String>(
+  value: 'home',
+  builder: (context, states) {
+    return Container(
+      color: states.contains(WidgetState.selected) ? Colors.blue : Colors.transparent,
+      child: Text('Home'),
+    );
   },
-  child: Column(
-    children: [
-      MyNavItem(value: SettingsSection.profile),
-      MyNavItem(value: SettingsSection.network),
-    ],
-  ),
 )
 ```
 
-> Uses Flutter's `FocusNode.focusInDirection()` internally — focus lands on the nearest
-> focusable widget in that direction relative to the pressed item. Accepts any
-> `TraversalDirection`: `up`, `down`, `left`, `right`.
+Under the hood it uses a `FilledButton` with a neutral style, inheriting Flutter's native
+focus engine — TV (D-pad), touch, mouse, and keyboard all work automatically.
 
-### Using `SelectionGroupRadio`
+Pass `value: null` to opt out of group selection while keeping focus and press states.
+Useful when you want the same button boilerplate without selection logic.
 
-A ready-to-use radio button. All colors default to transparent — pass `WidgetStateProperty` to style each state:
+### externalStates
+
+When `externalStates` is set, the item becomes a pure visual indicator driven by an
+external state set — it bypasses its own `focusNode`, `statesController`, and
+`FilledButton` entirely. Useful for composing a radio inside a list item:
 ```dart
-SelectionGroup<String>(
+SelectionItem<String>(
+  value: 'option1',
+  builder: (context, states) {
+    return Row(
+      children: [
+        Text('Option 1'),
+        SelectionRadio<String>(
+          value: 'option1',
+          externalStates: states, // mirrors the parent — no independent focus or press
+          borderColor: ...,
+          dotColor: ...,
+        ),
+      ],
+    );
+  },
+)
+```
+
+---
+
+## SelectionMixin
+
+Use when you need full control over the widget structure — for example, when you already
+have an existing widget and want to plug in selection logic without restructuring it:
+```dart
+class _MyNavItemState extends State<MyNavItem>
+    with SelectionMixin<MyNavItem, String> {
+
+  @override
+  String? get selectionValue => widget.value;
+
+  @override
+  Widget build(BuildContext context) {
+    return FilledButton(
+      focusNode: focusNode,               // provided by the mixin
+      statesController: statesController, // includes WidgetState.selected automatically
+      onPressed: () => select(),          // no-op outside a group
+      child: Text(widget.label),
+    );
+  }
+}
+```
+
+> **Always specify both types** in the mixin signature (e.g. `<MyWidget, String>`).
+> Without the value type, the mixin defaults to `dynamic` and won't find the
+> `SelectionGroup<String>` ancestor.
+
+---
+
+## SelectionRadio
+
+Flutter's built-in `Radio` doesn't expose its `WidgetStatesController` — so reacting
+to `focused`, `hovered`, and `selected` simultaneously in a custom design isn't possible
+without rewriting the widget from scratch. `SelectionRadio` exists to solve that.
+
+It exposes three layers — overlay, border, and dot — each driven by a
+`WidgetStateProperty`, so you write the appearance once and all state combinations work
+automatically:
+```dart
+SelectionGroup<String>.single(
   initialValue: 'a',
   selectOnFocus: false,
   child: Row(
     children: [
-      SelectionGroupRadio<String>(
+      SelectionRadio<String>(
         value: 'a',
         overlayColor: WidgetStateProperty.resolveWith((states) {
           return states.contains(WidgetState.focused)
@@ -284,62 +290,35 @@ SelectionGroup<String>(
 )
 ```
 
-### Advanced patterns
-
-**Independent groups side by side** — each `SelectionGroup` manages its own selection independently, even with the same values, even one inside the other:
-```dart
-Row(
-  children: [
-    SelectionGroup<String>(
-      initialValue: '1',
-      child: SelectionGroupRadio(value: '1', enabled: false), // selected but disabled
-    ),
-    SelectionGroup<String>(
-      initialValue: '1',
-      selectOnFocus: false,
-      child: Column(
-        children: [
-          SelectionGroupRadio(value: '1'),
-          SelectionGroupRadio(value: '2'),
-          SelectionGroupRadio(value: '3'),
-        ],
-      ),
-    ),
-  ],
-)
-```
-
-> Groups are scoped by the `InheritedWidget` tree — a `SelectionGroupRadio` (or any item) only registers with the nearest `SelectionGroup` ancestor. Two groups with the same values don't interfere with each other.
-
-**Radio button inside a list item** — pass `externalStates` to make the radio a passive indicator that mirrors the list item's own states, without stealing focus or intercepting input:
-```dart
-SelectionGroupItem<String>(
-  value: 'option1',
-  builder: (context, states) {
-    return Row(
-      children: [
-        Text('Option 1'),
-        SelectionGroupRadio<String>(
-          value: 'option1',
-          externalStates: states, // mirrors the parent — no independent focus or press
-          borderColor: ...,
-          dotColor: ...,
-        ),
-      ],
-    );
-  },
-)
-```
-
-> When `externalStates` is set, the item bypasses its internal `statesController`, `focusNode`, and `FilledButton` entirely — it becomes a pure visual indicator driven by the parent's states.
+---
 
 ## How it works
 
-`SelectionGroup` uses an `InheritedWidget` to provide a `SelectionGroupController` to all descendants. When focus enters the group, the controller calls `requestFocus()` on the `FocusNode` of the currently selected item.
+`SelectionGroup` uses an `InheritedWidget` to provide a controller to all descendants.
+When focus enters the group, the controller calls `requestFocus()` on the `FocusNode`
+of the currently selected item — restoring focus exactly where the user left off.
 
-Each item registers its `FocusNode` with the controller via `SelectionGroupItemMixin`,
-which handles registration, cleanup, and `WidgetState.selected` updates automatically.
-Calling `select()` also requests focus for the selected item, so touch interactions
-move focus correctly without any extra wiring.
+Each item registers its `FocusNode` via `SelectionMixin`, which handles registration,
+cleanup, and `WidgetState.selected` updates automatically. Calling `select()` also
+requests focus for the item, so touch interactions move focus correctly without any
+extra wiring.
 
-`SelectionGroup` also wraps its subtree in a `FocusTraversalGroup` with `WidgetOrderTraversalPolicy`, ensuring focus follows widget tree order internally — so developers don't need to add their own traversal groups or worry about focus leaking outside the group.
+`SelectionGroup` wraps its subtree in a `FocusTraversalGroup` with
+`WidgetOrderTraversalPolicy`, so focus follows widget tree order internally and doesn't
+leak outside the group.
+
+---
+
+## Migration from 0.1.x
+
+| Old | New |
+|---|---|
+| `SelectionGroup()` | `SelectionGroup.single()` |
+| `SelectionGroupItem` | `SelectionItem` |
+| `SelectionGroupItemMixin` | `SelectionMixin` |
+| `SelectionGroupRadio` | `SelectionRadio` |
+| `SelectionGroupController` | Internal — no longer part of the public API |
+
+The old API still works but is deprecated and frozen — it won't receive new features or
+bug fixes. Migrate to the new constructors to get multi-selection support and the
+`moveFocusOnPress` fix.

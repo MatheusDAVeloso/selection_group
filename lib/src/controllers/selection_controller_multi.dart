@@ -6,20 +6,18 @@ class SelectionControllerMulti<T> extends ValueNotifier<Set<T>> implements Selec
           initialValues ?? {},
         );
 
-  bool _groupHasFocus = false;
+  ValueChanged<T?>? _onFocusedItemChanged;
   int? _maxSelection;
   MaxSelectionBehavior _maxSelectionBehavior = MaxSelectionBehavior.block;
-
   final Map<T, FocusNode> _focusNodes = {};
   final Map<T, VoidCallback> _focusListeners = {};
-
   void Function(T item, bool isSelected)? _onItemToggled;
 
   @override
   void _register(T value, FocusNode node) {
     void listener() {
       if (node.hasFocus) {
-        _onItemToggled?.call(value, isSelected(value));
+        _onFocusedItemChanged?.call(value);
       }
     }
 
@@ -39,7 +37,7 @@ class SelectionControllerMulti<T> extends ValueNotifier<Set<T>> implements Selec
   }
 
   @override
-  void select(T value) {
+  void select(T value, {bool fromPress = false}) {
     final selected = Set<T>.from(this.value);
 
     if (selected.contains(value)) {
@@ -68,12 +66,12 @@ class SelectionControllerMulti<T> extends ValueNotifier<Set<T>> implements Selec
   @override
   bool isSelected(T value) => this.value.contains(value);
 
-  void _focusInitial(T value) {
-    _focusNodes[value]?.requestFocus();
+  void _setGroupFocused(bool hasFocus) {
+    if (!hasFocus) _onFocusedItemChanged?.call(null);
+    notifyListeners();
   }
 
-  void _setGroupFocused(bool hasFocus) {
-    _groupHasFocus = hasFocus;
-    notifyListeners();
+  void _focusInitial(T value) {
+    _focusNodes[value]?.requestFocus();
   }
 }

@@ -41,11 +41,11 @@ class SelectionControllerSingle<T> extends ValueNotifier<T?> implements Selectio
   }
 
   @override
-  void select(T value) {
+  void select(T value, {bool fromPress = false}) {
     this.value = value;
 
     final node = _focusNodes[value];
-    if (_moveFocusOnPress != null && node != null) {
+    if (fromPress && _moveFocusOnPress != null && node != null) {
       node.focusInDirection(_moveFocusOnPress!);
     } else {
       // requestFocus ensures focus follows selection on touch platforms,
@@ -60,13 +60,13 @@ class SelectionControllerSingle<T> extends ValueNotifier<T?> implements Selectio
     return !(suppressOnFocus && _groupHasFocus) && this.value == value;
   }
 
-  void _focusSelected() {
-    if (value != null) _focusNodes[value]?.requestFocus();
-  }
-
   void _setGroupFocused(bool hasFocus) {
     _groupHasFocus = hasFocus;
     if (!hasFocus) _onFocusedItemChanged?.call(null);
     notifyListeners();
+  }
+
+  void _focusSelected() {
+    if (value != null) _focusNodes[value]?.requestFocus();
   }
 }

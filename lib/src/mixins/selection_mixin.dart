@@ -44,9 +44,9 @@ mixin SelectionMixin<W extends StatefulWidget, T> on State<W> {
   /// Selects this item in the group.
   ///
   /// No-op when [selectionValue] is null or when there is no [SelectionGroup] ancestor.
-  void select() {
+  void select({bool fromPress = false}) {
     if (selectionValue != null) {
-      _controller?.select(selectionValue as T);
+      _controller?.select(selectionValue as T, fromPress: fromPress);
     }
   }
 }
