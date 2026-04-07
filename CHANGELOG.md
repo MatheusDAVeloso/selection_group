@@ -1,21 +1,39 @@
 ## 0.2.0
 
-- feat: added `SelectionGroup.multi()` — multi-selection support with `maxSelection`, 
-`MaxSelectionBehavior.block/dequeue`, `onItemToggled`, `initialItemToFocus`, 
-and `onFocusedItemChanged`.
+- feat: added `SelectionGroup.multi()`: multi-selection support with `maxSelection`,
+  `MaxSelectionBehavior.block/dequeue`, `onItemToggled`, `initialItemToFocus`,
+  and `onFocusedItemChanged`. Still in early testing, expect rough edges.
 
-- feat: added `SelectionGroup.single()` — same behavior as the original `SelectionGroup`, 
-now as a named constructor. The default constructor is deprecated in favor of this.
+- feat: added `SelectionGroup.single()` — same behavior as the original `SelectionGroup`,
+  now as a named constructor. The default constructor is deprecated in favor of this.
 
-- fix: `moveFocusOnPress` no longer triggers on focus events. Previously, navigating 
-with D-pad or keyboard would incorrectly call `focusInDirection`, causing focus to escape 
-the group. Now only triggers on press via `fromPress` parameter internally.
+- fix: `select()` now works correctly on all platforms. The fix introduced in 0.1.2
+  to make touch selection work correctly had regressed D-pad and keyboard navigation,
+  making the package essentially unusable on TV and desktop.
 
-- refactor: introduced `SelectionControllerBase` interface, `SelectionControllerSingle`, 
-and `SelectionControllerMulti`. Controllers are now internal — not part of the public API.
+- fix: `moveFocusOnPress` no longer triggers on focus traversal events. Previously,
+  navigating with D-pad or keyboard would incorrectly call `focusInDirection`, causing
+  focus to escape the group. Now correctly detects press via `WidgetState.pressed`
+  from the item's own `statesController`, requiring no manual parameter passing.
 
-- refactor: introduced `SelectionMixin` and `SelectionItem` as the new widget layer, 
-replacing `SelectionGroupItemMixin` and `SelectionGroupItem`.
+- refactor: introduced `SelectionControllerBase` interface and separate single/multi
+  controller implementations. Controllers are now internal — not part of the public API.
+
+- refactor: controllers are now the single source of truth for `WidgetState.selected`.
+  Previously the mixin polled the controller via `_handleControllerChange` to update
+  each item's state. Now the controller updates all `statesController`s directly and
+  surgically — only the affected items are updated on each `select()` call.
+
+- refactor: `_register` now receives the item's `WidgetStatesController`, allowing
+  the controller to manage focus, selection state, and press detection internally
+  without any logic leaking into the mixin or widget layer.
+
+- refactor: `SelectionMixin` is now a pure connector, registers/unregisters the item
+  in `didChangeDependencies` and `dispose`, exposes `select()`, and nothing else.
+  All logic lives in the controller.
+
+- refactor: introduced `SelectionMixin` and `SelectionItem` as the new widget layer,
+  replacing `SelectionGroupItemMixin` and `SelectionGroupItem`.
 
 - deprecated: `SelectionGroup()` default constructor — use `SelectionGroup.single()`.
 - deprecated: `SelectionGroupController` — controllers are now internal.
@@ -23,8 +41,11 @@ replacing `SelectionGroupItemMixin` and `SelectionGroupItem`.
 - deprecated: `SelectionGroupItem` — use `SelectionItem`.
 - deprecated: `SelectionGroupRadio` — use `SelectionRadio`.
 
-- note: `moveFocusOnPress` bug exists in the legacy API and will not be backported. 
-Migrate to `SelectionGroup.single()` to get the fix.
+- note: the `moveFocusOnPress` bug in the legacy API will not be backported.
+  Migrate to `SelectionGroup.single()` to get the fix.
+
+- note: the `select()` fix introduced in 0.1.2 is broken in the legacy API.
+  Either downgrade to 0.1.1 or migrate to `SelectionGroup.single()`.
 
 ## 0.1.2
 

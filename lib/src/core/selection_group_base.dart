@@ -1,5 +1,30 @@
 part of '../../selection_group.dart';
 
+/// Groups selectable items and manages which ones are selected.
+///
+/// Works similarly to [FocusTraversalGroup] — wraps a subtree and provides
+/// a [SelectionControllerBase] to descendants via [SelectionGroup.of].
+///
+/// Use [SelectionGroup.single] for single-selection (nav menus, radio groups)
+/// and [SelectionGroup.multi] for multi-selection (chip groups, checklists).
+///
+/// > **Always specify the type parameter** (e.g. `SelectionGroup<String>.single(...)`).
+/// > Without it, the group won't match values correctly and [WidgetState.selected]
+/// > won't fire.
+///
+/// {@tool snippet}
+/// ```dart
+/// SelectionGroup<String>.single(
+///   initialValue: 'home',
+///   child: Column(
+///     children: [
+///       SelectionItem<String>(value: 'home', builder: ...),
+///       SelectionItem<String>(value: 'search', builder: ...),
+///     ],
+///   ),
+/// )
+/// ```
+/// {@end-tool}
 class SelectionGroup<T> extends StatefulWidget {
   const SelectionGroup._({super.key});
 
@@ -25,6 +50,16 @@ class SelectionGroup<T> extends StatefulWidget {
         child: child,
       );
 
+  /// Creates a single-selection group.
+  ///
+  /// When focus enters the group, it automatically moves to the selected item.
+  ///
+  /// - [initialValue]: the selected item on first build.
+  /// - [onFocusedItemChanged]: called when focused item changes. `null` when group loses focus.
+  /// - [selectOnFocus]: whether focusing an item also selects it. Defaults to `true`.
+  /// - [maintainSelectionOnFocus]: whether [WidgetState.selected] stays visible while the group has focus.
+  /// - [focusInitialItem]: whether the initial item requests focus on the first frame.
+  /// - [moveFocusOnPress]: moves focus in this direction when an item is pressed.
   factory SelectionGroup.single({
     Key? key,
     required Widget child,
@@ -47,6 +82,14 @@ class SelectionGroup<T> extends StatefulWidget {
     );
   }
 
+  /// Creates a multi-selection group.
+  ///
+  /// - [initialValues]: the selected items on first build.
+  /// - [onItemToggled]: called when an item is toggled. Second argument is the new selected state.
+  /// - [onFocusedItemChanged]: called when focused item changes. `null` when group loses focus.
+  /// - [maxSelection]: maximum number of simultaneously selected items.
+  /// - [maxSelectionBehavior]: what happens when [maxSelection] is reached.
+  /// - [initialItemToFocus]: the item that receives focus on the first frame.
   factory SelectionGroup.multi({
     Key? key,
     required Widget child,
@@ -69,6 +112,10 @@ class SelectionGroup<T> extends StatefulWidget {
     );
   }
 
+  /// Returns the [SelectionControllerBase] from the closest [SelectionGroup] ancestor,
+  /// or null if there is none.
+  ///
+  /// Use this to drive selection programmatically from outside the group.
   static SelectionControllerBase<T>? of<T>(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_SelectionScope<T>>()?.controller;
   }

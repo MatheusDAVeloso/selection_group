@@ -25,12 +25,12 @@ class _SelectionGroupSingle<T> extends SelectionGroup<T> {
 }
 
 class _SelectionGroupSingleState<T> extends State<_SelectionGroupSingle<T>> {
-  late final SelectionControllerSingle<T> _controller;
+  late final _SelectionControllerSingle<T> _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = SelectionControllerSingle<T>(initialValue: widget.initialValue);
+    _controller = _SelectionControllerSingle<T>(initialValue: widget.initialValue);
     _controller._selectOnFocus = widget.selectOnFocus;
     _controller._maintainSelectionOnFocus = widget.maintainSelectionOnFocus;
     _controller._onFocusedItemChanged = widget.onFocusedItemChanged;

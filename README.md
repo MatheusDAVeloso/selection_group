@@ -165,6 +165,7 @@ SelectionGroup<String>.single(
 |---|---|
 | `block` | Prevents selecting more items once the limit is reached. |
 | `dequeue` | Removes the oldest selected item to make room for the new one. |
+
 ```dart
 SelectionGroup<String>.multi(
   maxSelection: 3,
@@ -175,10 +176,27 @@ SelectionGroup<String>.multi(
 
 ---
 
+## SelectionGroup.of\<T\>()
+
+Returns the `SelectionControllerBase<T>` from the closest `SelectionGroup<T>` ancestor, or `null` if there is none. Use this to drive selection programmatically from outside the group:
+
+```dart
+// Select an item without user interaction
+SelectionGroup.of<String>(context)?.select('home');
+
+// Check whether an item is currently selected
+final isSelected = SelectionGroup.of<String>(context)?.isSelected('home');
+```
+
+> **Always specify the type** when calling `SelectionGroup.of<T>()`. Without it, the lookup won't find the correct ancestor.
+
+---
+
 ## SelectionItem
 
 The recommended starting point. Handles focus, press, and `WidgetState` automatically —
 you only write the visual:
+
 ```dart
 SelectionItem<String>(
   value: 'home',
@@ -194,14 +212,19 @@ SelectionItem<String>(
 Under the hood it uses a `FilledButton` with a neutral style, inheriting Flutter's native
 focus engine — TV (D-pad), touch, mouse, and keyboard all work automatically.
 
-Pass `value: null` to opt out of group selection while keeping focus and press states.
-Useful when you want the same button boilerplate without selection logic.
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `value` | `T?` | required | Identifies this item within the group. Pass `null` to opt out of group selection while keeping focus and press states. |
+| `builder` | `Widget Function(BuildContext, Set<WidgetState>)` | required | Builds the visual. Receives the current state set on every change. |
+| `onPressed` | `VoidCallback?` | `null` | Additional callback fired on press, after `select()`. |
+| `enabled` | `bool` | `true` | When `false`, the button is disabled and `WidgetState.disabled` is applied. |
+| `autofocus` | `bool` | `false` | Whether this item requests focus when first built. |
+| `externalStates` | `Set<WidgetState>?` | `null` | When set, the item becomes a passive visual driven by these states instead of its own. See below. |
 
 ### externalStates
 
-When `externalStates` is set, the item becomes a pure visual indicator driven by an
-external state set — it bypasses its own `focusNode`, `statesController`, and
-`FilledButton` entirely. Useful for composing a radio inside a list item:
+When `externalStates` is set, the item becomes a pure visual indicator — it bypasses its own `focusNode`, `statesController`, and `FilledButton` entirely (rendered inside `IgnorePointer`). Useful for composing a radio inside a list item:
+
 ```dart
 SelectionItem<String>(
   value: 'option1',
@@ -227,6 +250,7 @@ SelectionItem<String>(
 
 Use when you need full control over the widget structure — for example, when you already
 have an existing widget and want to plug in selection logic without restructuring it:
+
 ```dart
 class _MyNavItemState extends State<MyNavItem>
     with SelectionMixin<MyNavItem, String> {
@@ -261,6 +285,16 @@ without rewriting the widget from scratch. `SelectionRadio` exists to solve that
 It exposes three layers — overlay, border, and dot — each driven by a
 `WidgetStateProperty`, so you write the appearance once and all state combinations work
 automatically:
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `value` | `T` | required | Identifies this radio within its `SelectionGroup`. |
+| `enabled` | `bool` | `true` | When `false`, `WidgetState.disabled` is applied. The radio can still be selected while disabled. |
+| `overlayColor` | `WidgetStateProperty<Color?>?` | `null` (transparent) | Color of the outer circle, typically used for focus/hover feedback. |
+| `borderColor` | `WidgetStateProperty<Color?>?` | `null` (transparent) | Color of the border circle. |
+| `dotColor` | `WidgetStateProperty<Color?>?` | `null` (transparent) | Color of the inner dot, typically visible when selected. |
+| `externalStates` | `Set<WidgetState>?` | `null` | When set, the radio renders passively using these states. See `SelectionItem.externalStates`. |
+
 ```dart
 SelectionGroup<String>.single(
   initialValue: 'a',

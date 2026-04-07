@@ -1,6 +1,14 @@
 part of '../../selection_group.dart';
 
 /// A radio button that integrates with [SelectionGroup].
+/// 
+/// /// Flutter's built-in [Radio] doesn't expose its [WidgetStatesController],
+/// making it impossible to react to [WidgetState.focused], [WidgetState.hovered],
+/// and [WidgetState.selected] simultaneously in a custom design without
+/// rewriting from scratch. [SelectionRadio] solves that by exposing three
+/// layers — overlay, border, and dot — each driven by a [WidgetStateProperty].
+///
+/// All colors default to transparent.
 ///
 /// Renders a three-layer circular indicator — overlay, border, and dot —
 /// driven entirely by [WidgetStateProperty] colors. All colors default to

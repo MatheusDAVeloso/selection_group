@@ -16,11 +16,6 @@ part of '../../selection_group.dart';
 /// still handles focus and press states normally — it just never receives
 /// [WidgetState.selected].
 ///
-/// An optional [style] is merged on top of the base [ButtonStyle], which
-/// already zeroes out all visual defaults (overlay, background, splash,
-/// padding, minimum size). Use it to override specific properties such as
-/// [ButtonStyle.minimumSize] when needed.
-///
 /// {@tool snippet}
 /// ```dart
 /// SelectionGroup.single<String>(
@@ -86,7 +81,7 @@ class _SelectionItemState<T> extends State<SelectionItem<T>> with SelectionMixin
       onPressed: !widget.enabled
           ? null
           : () {
-              select(fromPress: true);
+              select();
               widget.onPressed?.call();
             },
       statesController: statesController,

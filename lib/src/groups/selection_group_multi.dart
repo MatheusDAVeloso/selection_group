@@ -25,12 +25,12 @@ class _SelectionGroupMulti<T> extends SelectionGroup<T> {
 }
 
 class _SelectionGroupMultiState<T> extends State<_SelectionGroupMulti<T>> {
-  late final SelectionControllerMulti<T> _controller;
+  late final _SelectionControllerMulti<T> _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = SelectionControllerMulti<T>(initialValues: widget.initialValues);
+    _controller = _SelectionControllerMulti<T>(initialValues: widget.initialValues);
     _controller._onItemToggled = widget.onItemToggled;
     _controller._maxSelection = widget.maxSelection;
     _controller._maxSelectionBehavior = widget.maxSelectionBehavior;
