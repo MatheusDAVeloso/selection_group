@@ -60,6 +60,8 @@ class SelectionGroup<T> extends StatefulWidget {
   /// - [maintainSelectionOnFocus]: whether [WidgetState.selected] stays visible while the group has focus.
   /// - [focusInitialItem]: whether the initial item requests focus on the first frame.
   /// - [moveFocusOnPress]: moves focus in this direction when an item is pressed.
+  /// - [moveFocusOnBack]: moves focus in this direction when the back button is pressed.
+  ///   Useful for TV navigation. When null, the back button behaves normally.
   factory SelectionGroup.single({
     Key? key,
     required Widget child,
@@ -69,6 +71,7 @@ class SelectionGroup<T> extends StatefulWidget {
     bool maintainSelectionOnFocus = false,
     bool focusInitialItem = false,
     TraversalDirection? moveFocusOnPress,
+    TraversalDirection? moveFocusOnBack,
   }) {
     return _SelectionGroupSingle<T>(
       key: key,
@@ -78,6 +81,7 @@ class SelectionGroup<T> extends StatefulWidget {
       maintainSelectionOnFocus: maintainSelectionOnFocus,
       focusInitialItem: focusInitialItem,
       moveFocusOnPress: moveFocusOnPress,
+      moveFocusOnBack: moveFocusOnBack,
       child: child,
     );
   }

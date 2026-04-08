@@ -16,6 +16,9 @@ part of '../../selection_group.dart';
 /// still handles focus and press states normally — it just never receives
 /// [WidgetState.selected].
 ///
+/// - [moveFocusOnBack]: moves focus in this direction when the back button is pressed.
+///   Useful for TV navigation. When null, the back button behaves normally.
+///
 /// {@tool snippet}
 /// ```dart
 /// SelectionGroup.single<String>(
@@ -50,6 +53,7 @@ class SelectionItem<T> extends StatefulWidget {
     this.enabled = true,
     this.autofocus = false,
     this.externalStates,
+    this.moveFocusOnBack,
   });
 
   final T? value;
@@ -58,6 +62,7 @@ class SelectionItem<T> extends StatefulWidget {
   final bool enabled;
   final bool autofocus;
   final Set<WidgetState>? externalStates;
+  final TraversalDirection? moveFocusOnBack;
 
   @override
   State<SelectionItem<T>> createState() => _SelectionItemState<T>();
@@ -75,7 +80,7 @@ class _SelectionItemState<T> extends State<SelectionItem<T>> with SelectionMixin
       );
     }
 
-    return FilledButton(
+    Widget child = FilledButton(
       autofocus: widget.autofocus,
       focusNode: focusNode,
       onPressed: !widget.enabled
@@ -99,5 +104,19 @@ class _SelectionItemState<T> extends State<SelectionItem<T>> with SelectionMixin
         builder: (context, states, _) => widget.builder(context, states),
       ),
     );
+
+    if (widget.moveFocusOnBack != null) {
+      child = PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop && focusNode.hasFocus) {
+            focusNode.focusInDirection(widget.moveFocusOnBack!);
+          }
+        },
+        child: child,
+      );
+    }
+
+    return child;
   }
 }

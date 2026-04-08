@@ -1,3 +1,9 @@
+## 0.2.1
+
+- feat: added `moveFocusOnBack` to both `SelectionGroup.single()` and `SelectionItem` —
+  moves focus in the given `TraversalDirection` when the back button is pressed.
+  Useful for TV navigation.
+
 ## 0.2.0
 
 - feat: added `SelectionGroup.multi()`: multi-selection support with `maxSelection`,

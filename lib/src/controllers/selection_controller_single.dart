@@ -88,4 +88,11 @@ class _SelectionControllerSingle<T> extends ValueNotifier<T?> implements Selecti
   void _focusSelected() {
     if (value != null) _focusNodes[value]?.requestFocus();
   }
+
+  bool _moveFocusOnBackPressed(TraversalDirection direction) {
+    final focused = _focusNodes.entries.where((e) => e.value.hasFocus).firstOrNull;
+    if (focused == null) return false;
+    focused.value.focusInDirection(direction);
+    return true;
+  }
 }

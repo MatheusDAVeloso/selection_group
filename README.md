@@ -102,6 +102,7 @@ SelectionGroup<String>.multi(
 | `maintainSelectionOnFocus` | `bool` | `false` | Whether `WidgetState.selected` stays visible while the group has focus. |
 | `focusInitialItem` | `bool` | `false` | Whether the initial item requests focus on the first frame. |
 | `moveFocusOnPress` | `TraversalDirection?` | `null` | Moves focus in this direction when an item is pressed, instead of keeping it there. |
+| `moveFocusOnBack` | `TraversalDirection?` | `null` | Moves focus in this direction when the back button is pressed and a group item has focus. Only intercepts the event when focus is inside the group — doesn't consume it otherwise. Useful for TV navigation. |
 
 ### Switching pages
 ```dart
@@ -125,10 +126,23 @@ SelectionGroup<String>.single(
 
 ### Sidebar/content layout on TV
 ```dart
-SelectionGroup<Section>.single(
-  initialValue: Section.profile,
-  moveFocusOnPress: TraversalDirection.right, // after press, focus jumps to content
-  child: Column(...),
+// Sidebar: pressing OK moves focus to the content area.
+// Pressing back from the content area moves focus back to the sidebar.
+Row(
+  children: [
+    SelectionGroup<Section>.single(
+      initialValue: Section.profile,
+      moveFocusOnPress: TraversalDirection.right,
+      child: Column(...), // sidebar items
+    ),
+    Expanded(
+      child: SelectionItem<Section>(
+        value: currentSection,
+        moveFocusOnBack: TraversalDirection.left, // back → sidebar
+        builder: (context, states) => ContentView(),
+      ),
+    ),
+  ],
 )
 ```
 
@@ -220,6 +234,7 @@ focus engine — TV (D-pad), touch, mouse, and keyboard all work automatically.
 | `enabled` | `bool` | `true` | When `false`, the button is disabled and `WidgetState.disabled` is applied. |
 | `autofocus` | `bool` | `false` | Whether this item requests focus when first built. |
 | `externalStates` | `Set<WidgetState>?` | `null` | When set, the item becomes a passive visual driven by these states instead of its own. See below. |
+| `moveFocusOnBack` | `TraversalDirection?` | `null` | Moves focus in this direction when the back button is pressed and this item has focus. Only intercepts when focused — doesn't interfere with other items or handlers otherwise. Useful for TV navigation. |
 
 ### externalStates
 

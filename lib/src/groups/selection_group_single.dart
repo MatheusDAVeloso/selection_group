@@ -10,6 +10,7 @@ class _SelectionGroupSingle<T> extends SelectionGroup<T> {
     this.maintainSelectionOnFocus = false,
     this.focusInitialItem = false,
     this.moveFocusOnPress,
+    this.moveFocusOnBack,
   }) : super._();
 
   final Widget child;
@@ -19,6 +20,7 @@ class _SelectionGroupSingle<T> extends SelectionGroup<T> {
   final bool maintainSelectionOnFocus;
   final bool focusInitialItem;
   final TraversalDirection? moveFocusOnPress;
+  final TraversalDirection? moveFocusOnBack;
 
   @override
   State<_SelectionGroupSingle<T>> createState() => _SelectionGroupSingleState<T>();
@@ -60,7 +62,7 @@ class _SelectionGroupSingleState<T> extends State<_SelectionGroupSingle<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return FocusTraversalGroup(
+    Widget child = FocusTraversalGroup(
       policy: WidgetOrderTraversalPolicy(),
       child: Focus(
         skipTraversal: true,
@@ -74,5 +76,16 @@ class _SelectionGroupSingleState<T> extends State<_SelectionGroupSingle<T>> {
         ),
       ),
     );
+
+    if (widget.moveFocusOnBack != null) {
+      child = BackButtonListener(
+        onBackButtonPressed: () async {
+          return _controller._moveFocusOnBackPressed(widget.moveFocusOnBack!);
+        },
+        child: child,
+      );
+    }
+
+    return child;
   }
 }
