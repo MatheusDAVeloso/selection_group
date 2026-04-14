@@ -5,6 +5,7 @@ class _SelectionGroupSingle<T> extends SelectionGroup<T> {
     super.key,
     required this.child,
     this.initialValue,
+    this.controller,
     this.onFocusedItemChanged,
     this.selectOnFocus = true,
     this.maintainSelectionOnFocus = false,
@@ -15,6 +16,7 @@ class _SelectionGroupSingle<T> extends SelectionGroup<T> {
 
   final Widget child;
   final T? initialValue;
+  final SelectionControllerBase<T>? controller;
   final ValueChanged<T?>? onFocusedItemChanged;
   final bool selectOnFocus;
   final bool maintainSelectionOnFocus;
@@ -28,11 +30,18 @@ class _SelectionGroupSingle<T> extends SelectionGroup<T> {
 
 class _SelectionGroupSingleState<T> extends State<_SelectionGroupSingle<T>> {
   late final _SelectionControllerSingle<T> _controller;
+  bool _ownsController = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = _SelectionControllerSingle<T>(initialValue: widget.initialValue);
+    if (widget.controller != null) {
+      _controller = widget.controller as _SelectionControllerSingle<T>;
+    } else {
+      _controller = _SelectionControllerSingle<T>(initialValue: widget.initialValue);
+      _ownsController = true;
+    }
+
     _controller._selectOnFocus = widget.selectOnFocus;
     _controller._maintainSelectionOnFocus = widget.maintainSelectionOnFocus;
     _controller._onFocusedItemChanged = widget.onFocusedItemChanged;
@@ -56,7 +65,7 @@ class _SelectionGroupSingleState<T> extends State<_SelectionGroupSingle<T>> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    if (_ownsController) _controller.dispose();
     super.dispose();
   }
 

@@ -8,6 +8,12 @@ abstract interface class SelectionControllerBase<T> implements Listenable {
   void _register(T value, FocusNode node, WidgetStatesController statesController);
   void _unregister(T value);
 
+  /// Creates a controller for single selection.
+  factory SelectionControllerBase.single({T? initialValue}) = _SelectionControllerSingle<T>;
+
+  /// Creates a controller for multi selection.
+  factory SelectionControllerBase.multi({Set<T>? initialValues}) = _SelectionControllerMulti<T>;
+
   /// Selects the item with the given [value].
   void select(T value);
 

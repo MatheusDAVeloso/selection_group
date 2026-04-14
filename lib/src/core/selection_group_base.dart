@@ -55,6 +55,8 @@ class SelectionGroup<T> extends StatefulWidget {
   /// When focus enters the group, it automatically moves to the selected item.
   ///
   /// - [initialValue]: the selected item on first build.
+  /// - [controller]: optional external controller to drive selection programmatically.
+  ///   If provided, [initialValue] is ignored.
   /// - [onFocusedItemChanged]: called when focused item changes. `null` when group loses focus.
   /// - [selectOnFocus]: whether focusing an item also selects it. Defaults to `true`.
   /// - [maintainSelectionOnFocus]: whether [WidgetState.selected] stays visible while the group has focus.
@@ -66,6 +68,7 @@ class SelectionGroup<T> extends StatefulWidget {
     Key? key,
     required Widget child,
     T? initialValue,
+    SelectionControllerBase<T>? controller,
     ValueChanged<T?>? onFocusedItemChanged,
     bool selectOnFocus = true,
     bool maintainSelectionOnFocus = false,
@@ -76,6 +79,7 @@ class SelectionGroup<T> extends StatefulWidget {
     return _SelectionGroupSingle<T>(
       key: key,
       initialValue: initialValue,
+      controller: controller,
       onFocusedItemChanged: onFocusedItemChanged,
       selectOnFocus: selectOnFocus,
       maintainSelectionOnFocus: maintainSelectionOnFocus,
@@ -89,6 +93,8 @@ class SelectionGroup<T> extends StatefulWidget {
   /// Creates a multi-selection group.
   ///
   /// - [initialValues]: the selected items on first build.
+  /// - [controller]: optional external controller to drive selection programmatically.
+  ///   If provided, [initialValue] is ignored.
   /// - [onItemToggled]: called when an item is toggled. Second argument is the new selected state.
   /// - [onFocusedItemChanged]: called when focused item changes. `null` when group loses focus.
   /// - [maxSelection]: maximum number of simultaneously selected items.
@@ -98,6 +104,7 @@ class SelectionGroup<T> extends StatefulWidget {
     Key? key,
     required Widget child,
     Set<T>? initialValues,
+    SelectionControllerBase<T>? controller,
     void Function(T item, bool isSelected)? onItemToggled,
     int? maxSelection,
     MaxSelectionBehavior maxSelectionBehavior = MaxSelectionBehavior.block,
@@ -107,6 +114,7 @@ class SelectionGroup<T> extends StatefulWidget {
     return _SelectionGroupMulti<T>(
       key: key,
       initialValues: initialValues,
+      controller: controller,
       onItemToggled: onItemToggled,
       maxSelection: maxSelection,
       maxSelectionBehavior: maxSelectionBehavior,
@@ -119,7 +127,9 @@ class SelectionGroup<T> extends StatefulWidget {
   /// Returns the [SelectionControllerBase] from the closest [SelectionGroup] ancestor,
   /// or null if there is none.
   ///
-  /// Use this to drive selection programmatically from outside the group.
+  /// Use this to drive selection programmatically from a descendant widget.
+  /// To control the group from outside the widget tree, pass a [SelectionControllerBase]
+  /// directly via the [SelectionGroup.single] or [SelectionGroup.multi] `controller` parameter.
   static SelectionControllerBase<T>? of<T>(BuildContext context) {
     return context.dependOnInheritedWidgetOfExactType<_SelectionScope<T>>()?.controller;
   }

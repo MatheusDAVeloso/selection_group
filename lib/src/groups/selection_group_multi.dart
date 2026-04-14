@@ -5,6 +5,7 @@ class _SelectionGroupMulti<T> extends SelectionGroup<T> {
     super.key,
     required this.child,
     this.initialValues,
+    this.controller,
     this.onItemToggled,
     this.maxSelection,
     this.maxSelectionBehavior = MaxSelectionBehavior.block,
@@ -14,6 +15,7 @@ class _SelectionGroupMulti<T> extends SelectionGroup<T> {
 
   final Widget child;
   final Set<T>? initialValues;
+  final SelectionControllerBase<T>? controller;
   final void Function(T item, bool isSelected)? onItemToggled;
   final int? maxSelection;
   final MaxSelectionBehavior maxSelectionBehavior;
@@ -26,11 +28,19 @@ class _SelectionGroupMulti<T> extends SelectionGroup<T> {
 
 class _SelectionGroupMultiState<T> extends State<_SelectionGroupMulti<T>> {
   late final _SelectionControllerMulti<T> _controller;
+  bool _ownsController = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = _SelectionControllerMulti<T>(initialValues: widget.initialValues);
+
+    if (widget.controller != null) {
+      _controller = widget.controller as _SelectionControllerMulti<T>;
+    } else {
+      _controller = _SelectionControllerMulti<T>(initialValues: widget.initialValues);
+      _ownsController = true;
+    }
+
     _controller._onItemToggled = widget.onItemToggled;
     _controller._maxSelection = widget.maxSelection;
     _controller._maxSelectionBehavior = widget.maxSelectionBehavior;
@@ -54,7 +64,7 @@ class _SelectionGroupMultiState<T> extends State<_SelectionGroupMulti<T>> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    if (_ownsController) _controller.dispose();
     super.dispose();
   }
 
