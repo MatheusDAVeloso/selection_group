@@ -3,9 +3,11 @@ part of '../../selection_group.dart';
 class _SelectionControllerSingle<T> extends ValueNotifier<T?> implements SelectionControllerBase<T> {
   _SelectionControllerSingle({T? initialValue}) : super(initialValue);
 
+  bool _applySelectedState = true;
   bool _selectOnFocus = true;
   bool _maintainSelectionOnFocus = false;
   bool _groupHasFocus = false;
+  T? _focusedValue;
 
   final Map<T, FocusNode> _focusNodes = {};
   final Map<T, VoidCallback> _focusListeners = {};
@@ -20,6 +22,7 @@ class _SelectionControllerSingle<T> extends ValueNotifier<T?> implements Selecti
 
     void listener() {
       if (node.hasFocus) {
+        _focusedValue = value;
         if (_selectOnFocus) select(value);
         _onFocusedItemChanged?.call(value);
       }
@@ -29,7 +32,6 @@ class _SelectionControllerSingle<T> extends ValueNotifier<T?> implements Selecti
     _focusListeners[value] = listener;
     node.addListener(listener);
 
-    // Atualiza o estado selected ao registrar
     _updateSelected(value, statesController);
   }
 
@@ -47,6 +49,17 @@ class _SelectionControllerSingle<T> extends ValueNotifier<T?> implements Selecti
 
   @override
   void select(T value) {
+    final node = _focusNodes[value];
+    final isPressed = _statesControllers[value]?.value.contains(WidgetState.pressed) ?? false;
+
+    if (isPressed && _moveFocusOnPress != null && node != null) {
+      node.focusInDirection(_moveFocusOnPress!);
+    } else if (isPressed || !(node?.hasFocus ?? false)) {
+      node?.requestFocus();
+    }
+
+    if (!_applySelectedState) return;
+
     final previous = this.value;
     this.value = value;
 
@@ -56,19 +69,11 @@ class _SelectionControllerSingle<T> extends ValueNotifier<T?> implements Selecti
     }
     final sc = _statesControllers[value];
     if (sc != null) _updateSelected(value, sc);
-
-    final node = _focusNodes[value];
-    final isPressed = _statesControllers[value]?.value.contains(WidgetState.pressed) ?? false;
-
-    if (isPressed && _moveFocusOnPress != null && node != null) {
-      node.focusInDirection(_moveFocusOnPress!);
-    } else if (isPressed || !(node?.hasFocus ?? false)) {
-      node?.requestFocus();
-    }
   }
 
   @override
   bool isSelected(T value) {
+    if (!_applySelectedState) return false;
     final suppressOnFocus = !_maintainSelectionOnFocus;
     return !(suppressOnFocus && _groupHasFocus) && this.value == value;
   }
@@ -79,8 +84,10 @@ class _SelectionControllerSingle<T> extends ValueNotifier<T?> implements Selecti
 
   void _setGroupFocused(bool hasFocus) {
     _groupHasFocus = hasFocus;
-    if (!hasFocus) _onFocusedItemChanged?.call(null);
-    // Reavalia selected de todos os itens pois _groupHasFocus afeta isSelected
+    if (!hasFocus) {
+      _focusedValue = null;
+      _onFocusedItemChanged?.call(null);
+    }
     _statesControllers.forEach((k, sc) => _updateSelected(k, sc));
     notifyListeners();
   }
@@ -90,9 +97,9 @@ class _SelectionControllerSingle<T> extends ValueNotifier<T?> implements Selecti
   }
 
   bool _moveFocusOnBackPressed(TraversalDirection direction) {
-    final focused = _focusNodes.entries.where((e) => e.value.hasFocus).firstOrNull;
-    if (focused == null) return false;
-    focused.value.focusInDirection(direction);
+    final node = _focusNodes[_focusedValue];
+    if (node == null) return false;
+    node.focusInDirection(direction);
     return true;
   }
 }

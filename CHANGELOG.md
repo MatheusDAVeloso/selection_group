@@ -1,3 +1,24 @@
+## 0.2.2
+
+- feat(controller): exposed `SelectionControllerBase.single()` and `SelectionControllerBase.multi()`
+  named factories for external instantiation, allowing controllers to be created and managed
+  outside of `SelectionGroup`.
+
+- feat: added `controller` parameter to `SelectionGroup.single()` and `SelectionGroup.multi()` —
+  pass an externally created controller to take ownership of its lifecycle.
+  When provided, the group will not dispose the controller automatically.
+
+- feat: added `moveFocusOnPress` to `SelectionItem` —
+  moves focus in the given `TraversalDirection` when an item is pressed.
+  Useful for TV navigation.
+
+- feat: added `applySelectedState` parameter to `SelectionGroup.single()` —
+  when `false`, the group manages focus only, without applying `WidgetState.selected`
+  to any item. `initialValue` still determines which item receives initial focus.
+
+- perf: `SelectionControllerSingle` now caches the focused value internally,
+  replacing O(N) focus lookups in `_moveFocusOnBackPressed` with O(1) map lookups.
+
 ## 0.2.1
 
 - feat: added `moveFocusOnBack` to both `SelectionGroup.single()` and `SelectionItem` —

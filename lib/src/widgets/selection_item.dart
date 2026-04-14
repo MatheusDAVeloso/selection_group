@@ -16,6 +16,9 @@ part of '../../selection_group.dart';
 /// still handles focus and press states normally — it just never receives
 /// [WidgetState.selected].
 ///
+/// - [moveFocusOnPress]: moves focus in this direction when the item is pressed.
+///   Useful for TV navigation. When null, focus stays on the pressed item.
+///
 /// - [moveFocusOnBack]: moves focus in this direction when the back button is pressed.
 ///   Useful for TV navigation. When null, the back button behaves normally.
 ///
@@ -53,6 +56,7 @@ class SelectionItem<T> extends StatefulWidget {
     this.enabled = true,
     this.autofocus = false,
     this.externalStates,
+    this.moveFocusOnPress,
     this.moveFocusOnBack,
   });
 
@@ -62,6 +66,7 @@ class SelectionItem<T> extends StatefulWidget {
   final bool enabled;
   final bool autofocus;
   final Set<WidgetState>? externalStates;
+  final TraversalDirection? moveFocusOnPress;
   final TraversalDirection? moveFocusOnBack;
 
   @override
@@ -88,6 +93,9 @@ class _SelectionItemState<T> extends State<SelectionItem<T>> with SelectionMixin
           : () {
               select();
               widget.onPressed?.call();
+              if (widget.moveFocusOnPress != null) {
+                focusNode.focusInDirection(widget.moveFocusOnPress!);
+              }
             },
       statesController: statesController,
       style: const ButtonStyle(

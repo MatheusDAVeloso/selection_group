@@ -54,10 +54,15 @@ class SelectionGroup<T> extends StatefulWidget {
   ///
   /// When focus enters the group, it automatically moves to the selected item.
   ///
-  /// - [initialValue]: the selected item on first build.
+  /// - [initialValue]: the item that receives selection (and focus) on the first
+  ///   build. When [applySelectedState] is `false`, selection is not applied —
+  ///   this only determines which item receives initial focus.
+  ///   Ignored when [controller] is provided.
   /// - [controller]: optional external controller to drive selection programmatically.
   ///   If provided, [initialValue] is ignored.
   /// - [onFocusedItemChanged]: called when focused item changes. `null` when group loses focus.
+  /// - [applySelectedState]: whether pressing an item applies [WidgetState.selected].
+  ///   Set to `false` to use the group purely for focus management. Defaults to `true`.
   /// - [selectOnFocus]: whether focusing an item also selects it. Defaults to `true`.
   /// - [maintainSelectionOnFocus]: whether [WidgetState.selected] stays visible while the group has focus.
   /// - [focusInitialItem]: whether the initial item requests focus on the first frame.
@@ -70,6 +75,7 @@ class SelectionGroup<T> extends StatefulWidget {
     T? initialValue,
     SelectionControllerBase<T>? controller,
     ValueChanged<T?>? onFocusedItemChanged,
+    bool applySelectedState = true,
     bool selectOnFocus = true,
     bool maintainSelectionOnFocus = false,
     bool focusInitialItem = false,
@@ -81,6 +87,7 @@ class SelectionGroup<T> extends StatefulWidget {
       initialValue: initialValue,
       controller: controller,
       onFocusedItemChanged: onFocusedItemChanged,
+      applySelectedState: applySelectedState,
       selectOnFocus: selectOnFocus,
       maintainSelectionOnFocus: maintainSelectionOnFocus,
       focusInitialItem: focusInitialItem,

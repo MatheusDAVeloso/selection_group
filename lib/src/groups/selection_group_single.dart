@@ -7,6 +7,7 @@ class _SelectionGroupSingle<T> extends SelectionGroup<T> {
     this.initialValue,
     this.controller,
     this.onFocusedItemChanged,
+    this.applySelectedState = true,
     this.selectOnFocus = true,
     this.maintainSelectionOnFocus = false,
     this.focusInitialItem = false,
@@ -18,6 +19,7 @@ class _SelectionGroupSingle<T> extends SelectionGroup<T> {
   final T? initialValue;
   final SelectionControllerBase<T>? controller;
   final ValueChanged<T?>? onFocusedItemChanged;
+  final bool applySelectedState;
   final bool selectOnFocus;
   final bool maintainSelectionOnFocus;
   final bool focusInitialItem;
@@ -42,7 +44,8 @@ class _SelectionGroupSingleState<T> extends State<_SelectionGroupSingle<T>> {
       _ownsController = true;
     }
 
-    _controller._selectOnFocus = widget.selectOnFocus;
+    _controller._applySelectedState = widget.applySelectedState;
+    _controller._selectOnFocus = widget.applySelectedState && widget.selectOnFocus;
     _controller._maintainSelectionOnFocus = widget.maintainSelectionOnFocus;
     _controller._onFocusedItemChanged = widget.onFocusedItemChanged;
     _controller._moveFocusOnPress = widget.moveFocusOnPress;
@@ -57,7 +60,8 @@ class _SelectionGroupSingleState<T> extends State<_SelectionGroupSingle<T>> {
   @override
   void didUpdateWidget(_SelectionGroupSingle<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _controller._selectOnFocus = widget.selectOnFocus;
+    _controller._applySelectedState = widget.applySelectedState;
+    _controller._selectOnFocus = widget.applySelectedState && widget.selectOnFocus;
     _controller._maintainSelectionOnFocus = widget.maintainSelectionOnFocus;
     _controller._onFocusedItemChanged = widget.onFocusedItemChanged;
     _controller._moveFocusOnPress = widget.moveFocusOnPress;
