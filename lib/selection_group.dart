@@ -5,7 +5,7 @@
 /// │  Hold Ctrl + LMB to navigate through components                          │
 /// │                                                                          │
 /// │  Author: MatheusDAVeloso                                                 │
-/// │  Package Version: 0.2.1                                                  │
+/// │  Package Version: 0.2.2                                                  │
 /// │  Repo: https://github.com/MatheusDAVeloso/selection_group                │
 /// ├──────────────────────────────────────────────────────────────────────────┤
 /// │  ERAS                                                                    │
@@ -21,8 +21,9 @@
 /// │    SelectionControllerBase interface established.                        │
 /// │    Legacy 0.1.x API moved to deprecated/ — functional, not updated.      │
 /// │    Real-world stress testing in production.                              │
-/// │    See ROADMAP.md at repo root for full details.                         │
+/// │                                                                          │
 /// └──────────────────────────────────────────────────────────────────────────┘
+
 library selection_group;
 
 import 'package:flutter/material.dart';
