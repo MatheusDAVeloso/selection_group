@@ -134,6 +134,11 @@ controller.focus('search');    // requests focus only, no selection state change
 final isSelected = controller.isSelected('profile');
 ```
 
+> [!NOTE]
+> `focus()` is safe to call before the widget tree is built. If the item's `FocusNode`
+> isn't registered yet, the focus request is automatically deferred to the next frame
+> internally — no need to wrap it in `WidgetsBinding.instance.addPostFrameCallback`.
+
 ### 2. Pass it to the group
 
 ```dart
