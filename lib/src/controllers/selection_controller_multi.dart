@@ -88,4 +88,30 @@ class _SelectionControllerMulti<T> extends ValueNotifier<Set<T>> implements Sele
   void _focusInitial(T value) {
     _focusNodes[value]?.requestFocus();
   }
+
+  @override
+  void focus(T value) {
+    final node = _focusNodes[value];
+    if (node != null) {
+      node.requestFocus();
+    } else {
+      // Node not yet registered — schedule for the next frame.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _focusNodes[value]?.requestFocus();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final entry in _focusNodes.entries) {
+      final listener = _focusListeners[entry.key];
+      if (listener != null) entry.value.removeListener(listener);
+    }
+    _focusNodes.clear();
+    _focusListeners.clear();
+    _statesControllers.clear();
+    _onFocusedItemChanged = null;
+    super.dispose();
+  }
 }

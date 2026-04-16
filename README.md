@@ -108,7 +108,7 @@ Manages focus restoration and D-pad traversal without any visual selection state
 
 ```dart
 SelectionGroup<String>.single(
-  applySelectedState: false, // Core 0.2.2 feature
+  applySelectedState: false,
   child: Column(...),
 )
 ```
@@ -127,7 +127,8 @@ tree. This is the recommended way to handle selection in complex apps.
 final controller = SelectionControllerBase<String>.single(initialValue: 'home');
 
 // Drive it programmatically
-controller.select('search');
+controller.select('search');   // selects + requests focus (respects applySelectedState)
+controller.focus('search');    // requests focus only, no selection state change
 
 // Check state at any time
 final isSelected = controller.isSelected('profile');
@@ -143,9 +144,16 @@ SelectionGroup<String>.single(
 ```
 
 > [!TIP]
-> Use `.single()` or `.multi()` factories on `SelectionControllerBase` to create
-> the appropriate controller. Since you own the lifecycle, remember to `dispose()`
-> it when your ViewModel or State is destroyed.
+> Since you own the lifecycle, call `dispose()` when your ViewModel or State is
+> destroyed — it removes all `FocusNode` listeners and clears internal maps.
+
+```dart
+@override
+void dispose() {
+  controller.dispose();
+  super.dispose();
+}
+```
 
 ---
 
@@ -232,7 +240,11 @@ Returns the `SelectionControllerBase<T>` from the closest `SelectionGroup<T>` an
 or `null` if there is none:
 
 ```dart
+// select: applies selection state + requests focus
 SelectionGroup.of<String>(context)?.select('home');
+
+// focus: requests focus only, no selection state change
+SelectionGroup.of<String>(context)?.focus('home');
 
 final isSelected = SelectionGroup.of<String>(context)?.isSelected('home');
 ```

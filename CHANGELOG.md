@@ -1,3 +1,29 @@
+## 0.2.3
+
+- feat(controller): added `focus(T value)` to `SelectionControllerBase` —
+  requests focus on the item with the given value directly, without changing
+  selection state or checking press conditions (contrast with `select()`, which
+  applies selection state and respects `applySelectedState` and press guards).
+  If the item's `FocusNode` is not yet registered (e.g. the widget tree hasn't
+  built yet), the focus request is automatically deferred to the next frame via
+  `WidgetsBinding.addPostFrameCallback` — callers no longer need to wrap in a
+  `postFrameCallback` manually.
+
+- feat(controller): added `dispose()` to `SelectionControllerBase` —
+  exposes the underlying `ValueNotifier.dispose()` through the public interface,
+  allowing external controllers to be properly cleaned up without requiring a
+  cast. Removes all registered `FocusNode` listeners and clears internal maps.
+
+  > **Note:** in 0.2.2, `dispose()` was not part of `SelectionControllerBase`.
+  > The underlying `ValueNotifier` did have it, but callers had to cast to
+  > `ChangeNotifier` to reach it. This was an oversight — fixed here.
+
+- fix(group): `SelectionGroup` now performs safe cleanup of external controllers
+  on `dispose`. When a controller was provided externally (`_ownsController = false`),
+  the group no longer disposes it (unchanged), but it now nulls out any callbacks
+  that reference the widget's closures (`onFocusedItemChanged`, `moveFocusOnPress`,
+  `onItemToggled`) to prevent memory leaks from stale widget references.
+
 ## 0.2.2
 
 - feat(controller): exposed `SelectionControllerBase.single()` and `SelectionControllerBase.multi()`

@@ -64,7 +64,14 @@ class _SelectionGroupMultiState<T> extends State<_SelectionGroupMulti<T>> {
 
   @override
   void dispose() {
-    if (_ownsController) _controller.dispose();
+    if (_ownsController) {
+      _controller.dispose();
+    } else {
+      // Controller is external — don't dispose it, but clear callbacks that
+      // reference this widget's closures to prevent memory leaks.
+      _controller._onFocusedItemChanged = null;
+      _controller._onItemToggled = null;
+    }
     super.dispose();
   }
 
