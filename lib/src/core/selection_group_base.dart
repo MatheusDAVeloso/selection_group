@@ -52,7 +52,8 @@ class SelectionGroup<T> extends StatefulWidget {
 
   /// Creates a single-selection group.
   ///
-  /// When focus enters the group, it automatically moves to the selected item.
+  /// When focus enters the group, it automatically moves to the selected item
+  /// (scrolling it into view if it is inside a [Scrollable]).
   ///
   /// - [initialValue]: the item that receives selection (and focus) on the first
   ///   build. When [applySelectedState] is `false`, selection is not applied —
@@ -66,6 +67,7 @@ class SelectionGroup<T> extends StatefulWidget {
   /// - [selectOnFocus]: whether focusing an item also selects it. Defaults to `true`.
   /// - [maintainSelectionOnFocus]: whether [WidgetState.selected] stays visible while the group has focus.
   /// - [focusInitialItem]: whether the initial item requests focus on the first frame.
+  ///   Automatically scrolls the item into view if it is off-screen.
   /// - [moveFocusOnPress]: moves focus in this direction when an item is pressed.
   /// - [moveFocusOnBack]: moves focus in this direction when the back button is pressed.
   ///   Useful for TV navigation. When null, the back button behaves normally.
@@ -107,6 +109,7 @@ class SelectionGroup<T> extends StatefulWidget {
   /// - [maxSelection]: maximum number of simultaneously selected items.
   /// - [maxSelectionBehavior]: what happens when [maxSelection] is reached.
   /// - [initialItemToFocus]: the item that receives focus on the first frame.
+  ///   Automatically scrolls the item into view if it is off-screen.
   factory SelectionGroup.multi({
     Key? key,
     required Widget child,

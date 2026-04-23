@@ -137,7 +137,8 @@ final isSelected = controller.isSelected('profile');
 > [!NOTE]
 > `focus()` is safe to call before the widget tree is built. If the item's `FocusNode`
 > isn't registered yet, the focus request is automatically deferred to the next frame
-> internally — no need to wrap it in `WidgetsBinding.instance.addPostFrameCallback`.
+> internally — no need to wrap it in `postFrameCallback` manually.
+> It also automatically handles scrolling into view for off-screen items.
 
 ### 2. Pass it to the group
 
@@ -283,7 +284,7 @@ focus engine — TV (D-pad), touch, mouse, and keyboard all work automatically.
 | `builder` | `Widget Function(BuildContext, Set<WidgetState>)` | required | Builds the visual. Receives the current state set on every change. |
 | `onPressed` | `VoidCallback?` | `null` | Additional callback fired on press, after `select()`. |
 | `enabled` | `bool` | `true` | When `false`, `WidgetState.disabled` is applied. |
-| `autofocus` | `bool` | `false` | Whether this item requests focus when first built. |
+| `autofocus` | `bool` | `false` | Whether this item requests focus when first built. Automatically scrolls into view. |
 | `moveFocusOnPress` | `TraversalDirection?` | `null` | Moves focus in this direction when this item is pressed. Overrides the group's `moveFocusOnPress` for this item. |
 | `moveFocusOnBack` | `TraversalDirection?` | `null` | Moves focus in this direction when the **back button** (remotes/controllers) is pressed and this item has focus. |
 | `externalStates` | `Set<WidgetState>?` | `null` | When set, the item becomes a passive visual driven by these states. See below. |
@@ -387,6 +388,12 @@ SelectionGroup<String>.single(
 `SelectionGroup` uses an `InheritedWidget` to provide a controller to all descendants.
 When focus enters the group, the controller calls `requestFocus()` on the `FocusNode`
 of the currently selected item — restoring focus exactly where the user left off.
+
+Starting with **0.2.4**, it also handles **off-screen items** in `ListView`s. If an item 
+is outside the viewport when the group **initially gains focus** (restoration, autofocus, 
+or programmatic `focus()`), the controller automatically calls `Scrollable.ensureVisible` 
+to scroll it into view. This ensures visibility on entry without overriding natural 
+scroll behavior during normal D-pad navigation.
 
 Each item registers its `FocusNode` via `SelectionMixin`, which handles registration,
 cleanup, and `WidgetState.selected` updates automatically. Calling `select()` also

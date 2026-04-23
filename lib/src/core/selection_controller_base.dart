@@ -5,7 +5,7 @@ part of '../../selection_group.dart';
 /// Accessible via [SelectionGroup.of] when you need to drive selection
 /// programmatically from outside the group.
 abstract interface class SelectionControllerBase<T> implements Listenable {
-  void _register(T value, FocusNode node, WidgetStatesController statesController);
+  void _register(T value, FocusNode node, WidgetStatesController statesController, BuildContext context);
   void _unregister(T value);
 
   /// Creates a controller for single selection.
@@ -20,6 +20,9 @@ abstract interface class SelectionControllerBase<T> implements Listenable {
 
   /// Requests focus on the item with the given [value] directly, without
   /// changing selection state or checking press conditions.
+  ///
+  /// If the item is inside a [Scrollable] (like a [ListView]) and currently
+  /// off-screen, it is automatically scrolled into view via [Scrollable.ensureVisible].
   ///
   /// If the item's [FocusNode] is not yet registered (e.g. because the widget
   /// tree hasn't been built yet), the focus request is automatically scheduled

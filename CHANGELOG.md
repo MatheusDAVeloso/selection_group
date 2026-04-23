@@ -1,3 +1,10 @@
+## 0.2.4
+
+- fix: added automatic scroll-to-view for items in `ListView` or other `Scrollable`s.
+  Focus acquisition into the group (via restoration, `autofocus`, or `controller.focus()`)
+  now triggers `Scrollable.ensureVisible` to ensure off-screen items are brought into
+  view. Does not trigger during internal D-pad navigation to maintain smooth scrolling.
+
 ## 0.2.3
 
 - feat(controller): added `focus(T value)` to `SelectionControllerBase` —
