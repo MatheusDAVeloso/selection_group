@@ -7,20 +7,19 @@ class _SelectionControllerSingle<T> extends ValueNotifier<T?> implements Selecti
   bool _selectOnFocus = true;
   bool _maintainSelectionOnFocus = false;
   bool _groupHasFocus = false;
+  bool _disposed = false;
   T? _focusedValue;
 
   final Map<T, FocusNode> _focusNodes = {};
   final Map<T, VoidCallback> _focusListeners = {};
   final Map<T, WidgetStatesController> _statesControllers = {};
-  final Map<T, BuildContext> _contexts = {};
 
   ValueChanged<T?>? _onFocusedItemChanged;
   TraversalDirection? _moveFocusOnPress;
 
   @override
-  void _register(T value, FocusNode node, WidgetStatesController statesController, BuildContext context) {
+  void _register(T value, FocusNode node, WidgetStatesController statesController) {
     _statesControllers[value] = statesController;
-    _contexts[value] = context;
 
     void listener() {
       if (node.hasFocus) {
@@ -30,7 +29,9 @@ class _SelectionControllerSingle<T> extends ValueNotifier<T?> implements Selecti
         _onFocusedItemChanged?.call(value);
 
         if (isEntryFocus) {
-          final ctx = _contexts[value];
+          // Use node.context instead of a cached BuildContext — FocusNode tracks
+          // its own context and it is always current, eliminating stale-context issues.
+          final ctx = node.context;
           if (ctx != null && ctx.mounted) {
             Scrollable.ensureVisible(ctx, alignment: 0.5, duration: Duration.zero);
           }
@@ -48,7 +49,6 @@ class _SelectionControllerSingle<T> extends ValueNotifier<T?> implements Selecti
   @override
   void _unregister(T value) {
     _statesControllers.remove(value);
-    _contexts.remove(value);
 
     final node = _focusNodes.remove(value);
     final listener = _focusListeners.remove(value);
@@ -110,19 +110,23 @@ class _SelectionControllerSingle<T> extends ValueNotifier<T?> implements Selecti
   @override
   void focus(T value) {
     final node = _focusNodes[value];
-    final ctx = _contexts[value];
     if (node != null) {
       node.requestFocus();
+      // node.context is always current — no stale-context risk.
+      final ctx = node.context;
       if (ctx != null && ctx.mounted) {
         Scrollable.ensureVisible(ctx, alignment: 0.5, duration: Duration.zero);
       }
     } else {
       // Node not yet registered — schedule for the next frame.
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _focusNodes[value]?.requestFocus();
-        final lateCtx = _contexts[value];
-        if (lateCtx != null && lateCtx.mounted) {
-          Scrollable.ensureVisible(lateCtx, alignment: 0.5, duration: Duration.zero);
+        // Guard against disposal between the call and this callback firing.
+        if (_disposed) return;
+        final lateNode = _focusNodes[value];
+        lateNode?.requestFocus();
+        final ctx = lateNode?.context;
+        if (ctx != null && ctx.mounted) {
+          Scrollable.ensureVisible(ctx, alignment: 0.5, duration: Duration.zero);
         }
       });
     }
@@ -130,6 +134,7 @@ class _SelectionControllerSingle<T> extends ValueNotifier<T?> implements Selecti
 
   @override
   void dispose() {
+    _disposed = true;
     for (final entry in _focusNodes.entries) {
       final listener = _focusListeners[entry.key];
       if (listener != null) entry.value.removeListener(listener);
@@ -137,7 +142,6 @@ class _SelectionControllerSingle<T> extends ValueNotifier<T?> implements Selecti
     _focusNodes.clear();
     _focusListeners.clear();
     _statesControllers.clear();
-    _contexts.clear();
     _onFocusedItemChanged = null;
     super.dispose();
   }

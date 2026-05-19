@@ -54,6 +54,7 @@ class SelectionItem<T> extends StatefulWidget {
     required this.builder,
     this.onPressed,
     this.enabled = true,
+    this.focusNode,
     this.autofocus = false,
     this.externalStates,
     this.moveFocusOnPress,
@@ -64,6 +65,24 @@ class SelectionItem<T> extends StatefulWidget {
   final Widget Function(BuildContext context, Set<WidgetState> states) builder;
   final VoidCallback? onPressed;
   final bool enabled;
+
+  /// An optional external [FocusNode] to use instead of the one created
+  /// internally by [SelectionMixin].
+  ///
+  /// When provided, the [FilledButton] uses this node directly.
+  /// The caller is responsible for its lifecycle — [SelectionItem] will
+  /// **not** dispose it.
+  ///
+  /// Useful when focus must be programmatically requested from outside the
+  /// widget tree, e.g. after a route transition completes.
+  ///
+  /// > **Note:** only use this parameter when [value] is `null` (i.e., the
+  /// > item is used standalone, outside a [SelectionGroup]). When [value] is
+  /// > non-null, the group controller registers the internal mixin node, not
+  /// > this one. Providing an external node in that case will cause
+  /// > `controller.focus(value)` to silently target the wrong node.
+  final FocusNode? focusNode;
+
   final bool autofocus;
   final Set<WidgetState>? externalStates;
   final TraversalDirection? moveFocusOnPress;
@@ -77,6 +96,11 @@ class _SelectionItemState<T> extends State<SelectionItem<T>> with SelectionMixin
   @override
   T? get selectionValue => widget.value;
 
+  /// The effective [FocusNode] used by the [FilledButton] and any directional
+  /// focus calls. Prefers [widget.focusNode] (external) over the internal one
+  /// created by [SelectionMixin].
+  FocusNode get _effectiveNode => widget.focusNode ?? focusNode;
+
   @override
   Widget build(BuildContext context) {
     if (widget.externalStates != null) {
@@ -87,14 +111,14 @@ class _SelectionItemState<T> extends State<SelectionItem<T>> with SelectionMixin
 
     Widget child = FilledButton(
       autofocus: widget.autofocus,
-      focusNode: focusNode,
+      focusNode: _effectiveNode,
       onPressed: !widget.enabled
           ? null
           : () {
               select();
               widget.onPressed?.call();
               if (widget.moveFocusOnPress != null) {
-                focusNode.focusInDirection(widget.moveFocusOnPress!);
+                _effectiveNode.focusInDirection(widget.moveFocusOnPress!);
               }
             },
       statesController: statesController,
@@ -117,8 +141,8 @@ class _SelectionItemState<T> extends State<SelectionItem<T>> with SelectionMixin
       child = PopScope(
         canPop: false,
         onPopInvokedWithResult: (didPop, _) {
-          if (!didPop && focusNode.hasFocus) {
-            focusNode.focusInDirection(widget.moveFocusOnBack!);
+          if (!didPop && _effectiveNode.hasFocus) {
+            _effectiveNode.focusInDirection(widget.moveFocusOnBack!);
           }
         },
         child: child,

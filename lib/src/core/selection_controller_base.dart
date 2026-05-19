@@ -5,7 +5,7 @@ part of '../../selection_group.dart';
 /// Accessible via [SelectionGroup.of] when you need to drive selection
 /// programmatically from outside the group.
 abstract interface class SelectionControllerBase<T> implements Listenable {
-  void _register(T value, FocusNode node, WidgetStatesController statesController, BuildContext context);
+  void _register(T value, FocusNode node, WidgetStatesController statesController);
   void _unregister(T value);
 
   /// Creates a controller for single selection.

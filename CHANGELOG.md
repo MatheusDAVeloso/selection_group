@@ -1,3 +1,29 @@
+## 0.2.5
+
+- feat(`SelectionItem`): added optional `focusNode` parameter.
+  When provided, the internal `FilledButton` uses it instead of the `FocusNode`
+  created by `SelectionMixin`. The caller owns the lifecycle — `SelectionItem`
+  will not dispose an externally-supplied node.
+  Useful when focus must be programmatically requested from outside the widget
+  tree, e.g. after an animated route transition completes.
+
+- fix(`SelectionControllerMulti`): `_focusInitial` now delegates to `focus()`,
+  inheriting its `postFrameCallback` fallback. Previously it called
+  `_focusNodes[value]?.requestFocus()` directly, which silently dropped the
+  focus request if items had not yet registered their nodes in the first frame.
+
+- fix(`SelectionControllerSingle/Multi`): eliminated the `_contexts` map.
+  Controllers no longer cache a `BuildContext` at registration time. Instead,
+  `node.context` is used everywhere — `FocusNode` already tracks its own context
+  and it is always current, removing any possibility of a stale-context issue
+  when items move in dynamic lists. The `_register` method no longer takes a
+  `BuildContext` parameter (`SelectionMixin` updated accordingly).
+
+- fix(`SelectionControllerSingle/Multi`): added `_disposed` flag. The
+  `postFrameCallback` scheduled inside `focus()` now returns early if the
+  controller was disposed between the call and the callback firing, preventing
+  a focus request on a fully torn-down controller.
+
 ## 0.2.4
 
 - fix: added automatic scroll-to-view for items in `ListView` or other `Scrollable`s.

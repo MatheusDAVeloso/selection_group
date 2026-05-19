@@ -54,7 +54,7 @@ mixin SelectionMixin<W extends StatefulWidget, T> on State<W> {
 
     _controller = SelectionGroup.of<T>(context);
     if (selectionValue != null) {
-      _controller?._register(selectionValue as T, focusNode, statesController, context);
+      _controller?._register(selectionValue as T, focusNode, statesController);
     }
   }
 

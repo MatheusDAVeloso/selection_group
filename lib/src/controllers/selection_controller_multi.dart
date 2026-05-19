@@ -8,16 +8,15 @@ class _SelectionControllerMulti<T> extends ValueNotifier<Set<T>> implements Sele
   MaxSelectionBehavior _maxSelectionBehavior = MaxSelectionBehavior.block;
   void Function(T item, bool isSelected)? _onItemToggled;
   bool _groupHasFocus = false;
+  bool _disposed = false;
 
   final Map<T, FocusNode> _focusNodes = {};
   final Map<T, VoidCallback> _focusListeners = {};
   final Map<T, WidgetStatesController> _statesControllers = {};
-  final Map<T, BuildContext> _contexts = {};
 
   @override
-  void _register(T value, FocusNode node, WidgetStatesController statesController, BuildContext context) {
+  void _register(T value, FocusNode node, WidgetStatesController statesController) {
     _statesControllers[value] = statesController;
-    _contexts[value] = context;
 
     void listener() {
       if (node.hasFocus) {
@@ -25,7 +24,9 @@ class _SelectionControllerMulti<T> extends ValueNotifier<Set<T>> implements Sele
         _onFocusedItemChanged?.call(value);
 
         if (isEntryFocus) {
-          final ctx = _contexts[value];
+          // Use node.context instead of a cached BuildContext — FocusNode tracks
+          // its own context and it is always current, eliminating stale-context issues.
+          final ctx = node.context;
           if (ctx != null && ctx.mounted) {
             Scrollable.ensureVisible(ctx, alignment: 0.5, duration: Duration.zero);
           }
@@ -43,7 +44,6 @@ class _SelectionControllerMulti<T> extends ValueNotifier<Set<T>> implements Sele
   @override
   void _unregister(T value) {
     _statesControllers.remove(value);
-    _contexts.remove(value);
 
     final node = _focusNodes.remove(value);
     final listener = _focusListeners.remove(value);
@@ -98,26 +98,28 @@ class _SelectionControllerMulti<T> extends ValueNotifier<Set<T>> implements Sele
     notifyListeners();
   }
 
-  void _focusInitial(T value) {
-    _focusNodes[value]?.requestFocus();
-  }
+  void _focusInitial(T value) => focus(value);
 
   @override
   void focus(T value) {
     final node = _focusNodes[value];
-    final ctx = _contexts[value];
     if (node != null) {
       node.requestFocus();
+      // node.context is always current — no stale-context risk.
+      final ctx = node.context;
       if (ctx != null && ctx.mounted) {
         Scrollable.ensureVisible(ctx, alignment: 0.5, duration: Duration.zero);
       }
     } else {
       // Node not yet registered — schedule for the next frame.
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _focusNodes[value]?.requestFocus();
-        final lateCtx = _contexts[value];
-        if (lateCtx != null && lateCtx.mounted) {
-          Scrollable.ensureVisible(lateCtx, alignment: 0.5, duration: Duration.zero);
+        // Guard against disposal between the call and this callback firing.
+        if (_disposed) return;
+        final lateNode = _focusNodes[value];
+        lateNode?.requestFocus();
+        final ctx = lateNode?.context;
+        if (ctx != null && ctx.mounted) {
+          Scrollable.ensureVisible(ctx, alignment: 0.5, duration: Duration.zero);
         }
       });
     }
@@ -125,6 +127,7 @@ class _SelectionControllerMulti<T> extends ValueNotifier<Set<T>> implements Sele
 
   @override
   void dispose() {
+    _disposed = true;
     for (final entry in _focusNodes.entries) {
       final listener = _focusListeners[entry.key];
       if (listener != null) entry.value.removeListener(listener);
@@ -132,8 +135,8 @@ class _SelectionControllerMulti<T> extends ValueNotifier<Set<T>> implements Sele
     _focusNodes.clear();
     _focusListeners.clear();
     _statesControllers.clear();
-    _contexts.clear();
     _onFocusedItemChanged = null;
+    _onItemToggled = null;
     super.dispose();
   }
 }
